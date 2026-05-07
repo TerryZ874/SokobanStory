@@ -1,7 +1,7 @@
 extends Control
 
 func _ready():
-	$Title.add_theme_font_size_override("font_size", 36)
+	$Title.add_theme_font_size_override("font_size", 64)
 	$StartBtn.pressed.connect(_on_start)
 	$QuitBtn.pressed.connect(_on_quit)
 

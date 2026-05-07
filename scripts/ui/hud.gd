@@ -5,6 +5,7 @@ extends Control
 @onready var victory_panel = $VictoryPanel
 @onready var defeat_panel = $DefeatPanel
 @onready var victory_next_btn = $VictoryPanel/NextBtn
+@onready var victory_replay_btn = $VictoryPanel/ReplayBtn
 @onready var defeat_retry_btn = $DefeatPanel/RetryBtn
 
 func _ready():
@@ -14,6 +15,7 @@ func _ready():
 	$RestartBtn.pressed.connect(_on_restart)
 	$BackBtn.pressed.connect(_on_back)
 	victory_next_btn.pressed.connect(_on_next_level)
+	victory_replay_btn.pressed.connect(_on_restart)
 	$VictoryPanel/BackBtn.pressed.connect(_on_back)
 	defeat_retry_btn.pressed.connect(_on_restart)
 	$DefeatPanel/BackBtn.pressed.connect(_on_back)

@@ -2,9 +2,8 @@ extends Node2D
 
 enum CELL { FLOOR, WALL, BOX, PLAYER }
 
-const TILE_SIZE := 64
-const VIEWPORT_W := 640
-const VIEWPORT_H := 480
+const GAME_W := 1920
+const GAME_H := 1080
 
 var level: Dictionary
 var grid_state: Array
@@ -18,34 +17,23 @@ var is_moving := false
 var game_over := false
 var move_history: Array = []
 var board_offset := Vector2.ZERO
+var tile_size := 64
 
-@onready var box_container = $BoxContainer
+@onready var floor_container = $FloorContainer
+@onready var wall_container = $WallContainer
+@onready var target_container = $TargetContainer
+@onready var entity_container = $EntityContainer
 @onready var hud = $CanvasLayer/HUD
 
 func _ready():
 	start_level(game_state.current_level_id)
 
-func _draw():
-	print(grid_state)
-	if grid_state.is_empty():
-		return
-	for row in level.rows:
-		for col in level.cols:
-			var pos = Vector2(board_offset.x + col * TILE_SIZE, board_offset.y + row * TILE_SIZE)
-			match grid_state[row][col]:
-				CELL.WALL:
-					# 墙的颜色 — 改这里
-					draw_rect(Rect2(pos, Vector2(TILE_SIZE, TILE_SIZE)), Color("#999999"))
-				_:
-					# 地板的颜色 — 改这里
-					draw_rect(Rect2(pos, Vector2(TILE_SIZE, TILE_SIZE)), Color("#2d2d2d"))
-
-	for t in targets:
-		var pos = Vector2(
-			board_offset.x + t.x * TILE_SIZE + TILE_SIZE / 4,
-			board_offset.y + t.y * TILE_SIZE + TILE_SIZE / 4
-		)
-		draw_rect(Rect2(pos, Vector2(TILE_SIZE / 2, TILE_SIZE / 2)), Color("#ff6b6b"))
+func _compute_tile_size(rows: int, cols: int) -> int:
+	var avail_w = GAME_W - 120
+	var avail_h = GAME_H - 160
+	var max_tile_w = avail_w / cols if cols > 0 else avail_w
+	var max_tile_h = avail_h / rows if rows > 0 else avail_h
+	return max(16, min(max_tile_w, max_tile_h))
 
 func _unhandled_input(event: InputEvent):
 	var ke := event as InputEventKey
@@ -74,19 +62,10 @@ func _unhandled_input(event: InputEvent):
 	if dir != Vector2.ZERO:
 		move_player(dir)
 
-func _get_board_offset() -> Vector2:
-	var vs = get_viewport_rect().size
-	if vs.x <= 1 or vs.y <= 1:
-		vs = Vector2(VIEWPORT_W, VIEWPORT_H)
-	return Vector2(
-		(vs.x - level.cols * TILE_SIZE) / 2,
-		(vs.y - level.rows * TILE_SIZE) / 2
-	)
-
 func _grid_to_pixel(col: float, row: float) -> Vector2:
 	return Vector2(
-		board_offset.x + col * TILE_SIZE + TILE_SIZE / 2,
-		board_offset.y + row * TILE_SIZE + TILE_SIZE / 2
+		board_offset.x + col * tile_size + tile_size / 2,
+		board_offset.y + row * tile_size + tile_size / 2
 	)
 
 func start_level(level_id: int):
@@ -105,7 +84,6 @@ func start_level(level_id: int):
 	current_steps = 0
 	is_moving = false
 	game_over = false
-	board_offset = _get_board_offset()
 
 	for t in level.targets:
 		targets.append(Vector2(t[0], t[1]))
@@ -116,10 +94,16 @@ func start_level(level_id: int):
 			r.append(int(v))
 		grid_state.append(r)
 
+	tile_size = _compute_tile_size(level.rows, level.cols)
+	board_offset = Vector2(
+		(GAME_W - level.cols * tile_size) / 2,
+		(GAME_H - level.rows * tile_size) / 2
+	)
+
+	_render_board()
 	_create_player_and_boxes()
 	_clear_grid_state_entities()
 	_update_box_visuals()
-	queue_redraw()
 
 	hud.update_level_info(level.name)
 	hud.update_step_count(current_steps, level.step_limit)
@@ -129,8 +113,38 @@ func _clear_board():
 	if player_node:
 		player_node.queue_free()
 		player_node = null
-	for c in box_container.get_children():
+	for c in entity_container.get_children():
 		c.queue_free()
+	for c in wall_container.get_children():
+		c.queue_free()
+	for c in target_container.get_children():
+		c.queue_free()
+	for c in floor_container.get_children():
+		c.queue_free()
+
+func _render_board():
+	var fg = ColorRect.new()
+	fg.size = Vector2(level.cols * tile_size, level.rows * tile_size)
+	fg.position = board_offset
+	fg.color = Color("#2d2d2d")
+	floor_container.add_child(fg)
+
+	for row in level.rows:
+		for col in level.cols:
+			if grid_state[row][col] == CELL.WALL:
+				var w = ColorRect.new()
+				w.size = Vector2(tile_size, tile_size)
+				w.position = board_offset + Vector2(col * tile_size, row * tile_size)
+				w.color = Color("#999999")
+				wall_container.add_child(w)
+
+	for t in targets:
+		var m = ColorRect.new()
+		var s = tile_size * 0.5
+		m.size = Vector2(s, s)
+		m.position = board_offset + Vector2(t.x * tile_size + (tile_size - s) * 0.5, t.y * tile_size + (tile_size - s) * 0.5)
+		m.color = Color("#ff6b6b")
+		target_container.add_child(m)
 
 func _create_player_and_boxes():
 	for row in level.rows:
@@ -147,39 +161,39 @@ func _make_player(col: int, row: int):
 	player_pos = Vector2(col, row)
 
 	var vis = ColorRect.new()
-	vis.size = Vector2(TILE_SIZE - 8, TILE_SIZE - 8)
-	vis.position = Vector2(-(TILE_SIZE - 8) / 2, -(TILE_SIZE - 8) / 2)
+	vis.size = Vector2(tile_size - 8, tile_size - 8)
+	vis.position = Vector2(-(tile_size - 8) / 2, -(tile_size - 8) / 2)
 	vis.color = Color("#4ecdc4")
 	player_node.add_child(vis)
 
 	var col_shape = CollisionShape2D.new()
 	var shape = RectangleShape2D.new()
-	shape.size = Vector2(TILE_SIZE - 8, TILE_SIZE - 8)
+	shape.size = Vector2(tile_size - 8, tile_size - 8)
 	col_shape.shape = shape
 	player_node.add_child(col_shape)
 
-	add_child(player_node)
+	entity_container.add_child(player_node)
 
 func _make_box(col: int, row: int):
 	var b = Area2D.new()
 	b.position = _grid_to_pixel(col, row)
 
 	var vis = ColorRect.new()
-	vis.size = Vector2(TILE_SIZE - 8, TILE_SIZE - 8)
-	vis.position = Vector2(-(TILE_SIZE - 8) / 2, -(TILE_SIZE - 8) / 2)
+	vis.size = Vector2(tile_size - 8, tile_size - 8)
+	vis.position = Vector2(-(tile_size - 8) / 2, -(tile_size - 8) / 2)
 	vis.color = Color("#d4a574")
 	b.add_child(vis)
 
 	var col_shape = CollisionShape2D.new()
 	var shape = RectangleShape2D.new()
-	shape.size = Vector2(TILE_SIZE - 8, TILE_SIZE - 8)
+	shape.size = Vector2(tile_size - 8, tile_size - 8)
 	col_shape.shape = shape
 	b.add_child(col_shape)
 
 	var bs = preload("res://scripts/game/box.gd")
 	b.set_script(bs)
 
-	box_container.add_child(b)
+	entity_container.add_child(b)
 	boxes.append(b)
 	box_positions.append(Vector2(col, row))
 
