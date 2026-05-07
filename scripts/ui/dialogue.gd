@@ -15,6 +15,15 @@ func _ready():
 		_finish_dialogue()
 		return
 
+	name_label.add_theme_color_override("font_color", Color("#4ecdc4"))
+	name_label.add_theme_font_size_override("font_size", 28)
+	ill_label.add_theme_color_override("font_color", Color("#b3b366"))
+	ill_label.add_theme_font_size_override("font_size", 18)
+	text_label.add_theme_color_override("font_color", Color("#ffffff"))
+	text_label.add_theme_font_size_override("font_size", 32)
+	continue_hint.add_theme_color_override("font_color", Color("#808080"))
+	continue_hint.add_theme_font_size_override("font_size", 20)
+
 	$DialoguePanel/SkipBtn.pressed.connect(_on_skip)
 	_show_line(0)
 
