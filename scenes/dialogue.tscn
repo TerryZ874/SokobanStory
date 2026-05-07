@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3 uid="uid://cv0tawmb2gq5r"]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue.gd" id="1"]
+
+[node name="Dialogue" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="DialoguePanel" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 630.0
+offset_right = 1760.0
+offset_bottom = 1030.0
+color = Color(0.08, 0.08, 0.1, 0.95)
+
+[node name="NameLabel" type="Label" parent="DialoguePanel"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 15.0
+offset_right = 500.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.31, 0.8, 0.8)
+theme_override_font_sizes/font_size = 28
+
+[node name="SkipBtn" type="Button" parent="DialoguePanel"]
+layout_mode = 0
+offset_left = 1430.0
+offset_top = 15.0
+offset_right = 1560.0
+offset_bottom = 50.0
+text = "跳过对话"
+
+[node name="IllustrationLabel" type="Label" parent="DialoguePanel"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 70.0
+offset_right = 1570.0
+offset_bottom = 110.0
+theme_override_colors/font_color = Color(0.7, 0.7, 0.4)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="TextLabel" type="Label" parent="DialoguePanel"]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 120.0
+offset_right = 1570.0
+offset_bottom = 370.0
+theme_override_colors/font_color = Color(1, 1, 1)
+theme_override_font_sizes/font_size = 32
+autowrap_mode = 2
+vertical_alignment = 1
+
+[node name="ContinueHint" type="Label" parent="DialoguePanel"]
+layout_mode = 0
+offset_left = 700.0
+offset_top = 375.0
+offset_right = 900.0
+offset_bottom = 400.0
+text = "点击继续"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5)
+theme_override_font_sizes/font_size = 20

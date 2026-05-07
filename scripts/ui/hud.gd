@@ -33,7 +33,9 @@ func update_step_count(steps: int, max_steps: int):
 func show_victory():
 	victory_panel.show()
 	var next_id = game_state.current_level_id + 1
-	victory_next_btn.disabled = next_id > level_data.get_level_count()
+	var has_next = next_id <= level_data.get_level_count()
+	var has_story = not story_data.get_story(game_state.current_level_id).is_empty()
+	victory_next_btn.disabled = not has_next and not has_story
 
 func show_defeat():
 	defeat_panel.show()
@@ -57,6 +59,12 @@ func _on_back():
 
 func _on_next_level():
 	var next_id = game_state.current_level_id + 1
-	if next_id <= level_data.get_level_count():
-		hide_overlays()
-		get_board().start_level(next_id)
+	hide_overlays()
+	var story = story_data.get_story(game_state.current_level_id)
+	if not story.is_empty():
+		game_state.pending_story = story
+		game_state.next_level_after_dialogue = next_id
+		get_tree().change_scene_to_file("res://scenes/dialogue.tscn")
+	else:
+		if next_id <= level_data.get_level_count():
+			get_board().start_level(next_id)

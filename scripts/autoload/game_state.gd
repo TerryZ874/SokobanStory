@@ -1,6 +1,8 @@
 extends Node
 
 var current_level_id := 1
+var pending_story: Array = []
+var next_level_after_dialogue: int = 1
 var progress := {}
 
 func _ready():
