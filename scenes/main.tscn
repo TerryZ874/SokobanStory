@@ -28,10 +28,77 @@ offset_right = 1060.0
 offset_bottom = 550.0
 text = "开始游戏"
 
-[node name="QuitBtn" type="Button" parent="."]
+[node name="PasswordBtn" type="Button" parent="."]
 layout_mode = 0
 offset_left = 860.0
 offset_top = 570.0
 offset_right = 1060.0
 offset_bottom = 620.0
+text = "输入密码"
+
+[node name="SandboxBtn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 860.0
+offset_top = 640.0
+offset_right = 1060.0
+offset_bottom = 690.0
+text = "沙盒关卡"
+
+[node name="QuitBtn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 860.0
+offset_top = 710.0
+offset_right = 1060.0
+offset_bottom = 760.0
 text = "退出"
+
+[node name="PasswordPanel" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 760.0
+offset_top = 340.0
+offset_right = 1160.0
+offset_bottom = 740.0
+color = Color(0, 0, 0, 0.9)
+
+[node name="Label" type="Label" parent="PasswordPanel"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 80.0
+offset_right = 350.0
+offset_bottom = 120.0
+text = "请输入关卡密码"
+horizontal_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="PasswordPanel"]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 150.0
+offset_right = 325.0
+offset_bottom = 190.0
+placeholder_text = "例如: a1b2c3"
+max_length = 6
+
+[node name="ConfirmBtn" type="Button" parent="PasswordPanel"]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 220.0
+offset_right = 275.0
+offset_bottom = 265.0
+text = "确认"
+
+[node name="CancelBtn" type="Button" parent="PasswordPanel"]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 280.0
+offset_right = 275.0
+offset_bottom = 325.0
+text = "取消"
+
+[node name="ErrorLabel" type="Label" parent="PasswordPanel"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 30.0
+offset_right = 350.0
+offset_bottom = 70.0
+horizontal_alignment = 1

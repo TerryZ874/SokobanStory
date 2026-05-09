@@ -1,0 +1,22 @@
+关卡集名称：The First One
+描述：
+Better luck next time
+  
+信箱:muhammad.umar@esstec.com.pk
+版权:Muhammad Umar
+
+Level - 1
+ ########## 
+ #. .... .# 
+ #$##  ##$# 
+##        ##
+#.  #  #  .#
+#    ##    #
+##        ##
+ # $$$$$$ # 
+ #   @    # 
+ ########## 
+Title:Smiley
+Author:Muhammad Umar
+
+

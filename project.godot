@@ -20,6 +20,7 @@ config/features=PackedStringArray("4.4")
 level_data="*res://scripts/autoload/level_data.gd"
 game_state="*res://scripts/autoload/game_state.gd"
 story_data="*res://scripts/autoload/story_data.gd"
+sandbox_data="*res://scripts/autoload/sandbox_data.gd"
 
 [display]
 

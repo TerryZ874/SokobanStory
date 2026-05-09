@@ -7,6 +7,7 @@ extends Control
 @onready var victory_next_btn = $VictoryPanel/NextBtn
 @onready var victory_replay_btn = $VictoryPanel/ReplayBtn
 @onready var defeat_retry_btn = $DefeatPanel/RetryBtn
+@onready var password_label = $VictoryPanel/PasswordLabel
 
 func _ready():
 	hide_overlays()
@@ -23,6 +24,14 @@ func _ready():
 func update_level_info(name: String):
 	level_label.text = name
 
+func update_password_display():
+	if game_state.is_sandbox:
+		$PasswordHint.hide()
+		return
+	var pwd = game_state.generate_password(game_state.current_level_id)
+	$PasswordHint.text = "密码: " + pwd
+	$PasswordHint.show()
+
 func update_step_count(steps: int, max_steps: int):
 	var color = Color("#ffffff")
 	if steps > max_steps:
@@ -32,10 +41,21 @@ func update_step_count(steps: int, max_steps: int):
 
 func show_victory():
 	victory_panel.show()
+	if not game_state.is_sandbox:
+		var pwd = game_state.generate_password(game_state.current_level_id)
+		password_label.text = "密码: " + pwd
+		password_label.show()
+	else:
+		password_label.hide()
+
 	var next_id = game_state.current_level_id + 1
-	var has_next = next_id <= level_data.get_level_count()
-	var has_story = not story_data.get_story(game_state.current_level_id).is_empty()
-	victory_next_btn.disabled = not has_next and not has_story
+	if game_state.is_sandbox:
+		var has_next_sandbox = not sandbox_data.get_level(next_id).is_empty()
+		victory_next_btn.disabled = not has_next_sandbox
+	else:
+		var has_next = next_id <= level_data.get_level_count()
+		var has_story = not story_data.get_story(game_state.current_level_id).is_empty()
+		victory_next_btn.disabled = not has_next and not has_story
 
 func show_defeat():
 	defeat_panel.show()
@@ -60,6 +80,10 @@ func _on_back():
 func _on_next_level():
 	var next_id = game_state.current_level_id + 1
 	hide_overlays()
+	if game_state.is_sandbox:
+		if not sandbox_data.get_level(next_id).is_empty():
+			get_board().start_level(next_id)
+		return
 	var story = story_data.get_story(game_state.current_level_id)
 	if not story.is_empty():
 		game_state.pending_story = story

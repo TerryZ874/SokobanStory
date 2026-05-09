@@ -3,42 +3,32 @@ extends Node
 var current_level_id := 1
 var pending_story: Array = []
 var next_level_after_dialogue: int = 1
-var progress := {}
+var is_sandbox := false
 
-func _ready():
-	load_progress()
+const PASS_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
-func level_completed(level_id: int, steps: int):
-	if not progress.has("completed_levels"):
-		progress.completed_levels = {}
+func generate_password(level_id: int) -> String:
+	var n = level_id * 100000000 + 12345678
+	var result = ""
+	for i in range(6):
+		result = PASS_CHARS[n % 36] + result
+		n /= 36
+	return result
 
-	var key = str(level_id)
-	var entry = progress.completed_levels.get(key, {})
-	if not entry.get("completed", false):
-		progress.completed_levels[key] = {"best_steps": steps, "completed": true}
-	elif steps < entry.get("best_steps", steps):
-		progress.completed_levels[key].best_steps = steps
+# Called by board.gd on level completion — kept as stub since passwords replace saves
+func level_completed(_level_id: int, _steps: int):
+	pass
 
-	if not progress.has("unlocked_levels"):
-		progress.unlocked_levels = [1]
-
-	var next_id = level_id + 1
-	if next_id <= level_data.get_level_count() and next_id not in progress.unlocked_levels:
-		progress.unlocked_levels.append(next_id)
-
-	save_progress()
-
-func save_progress():
-	var file = FileAccess.open("user://progress.json", FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.new().stringify(progress))
-
-func load_progress():
-	var file = FileAccess.open("user://progress.json", FileAccess.READ)
-	if file:
-		var json = JSON.new()
-		if json.parse(file.get_as_text()) == OK:
-			progress = json.data
-			return
-
-	progress = {"unlocked_levels": [1], "completed_levels": {}}
+func validate_password(pwd: String) -> int:
+	pwd = pwd.strip_edges().to_lower()
+	if pwd.is_empty():
+		return -1
+	if pwd.length() != 6:
+		return -1
+	for ch in pwd:
+		if PASS_CHARS.find(ch) < 0:
+			return -1
+	for lid in range(1, level_data.get_level_count() + 1):
+		if generate_password(lid) == pwd:
+			return lid
+	return -1

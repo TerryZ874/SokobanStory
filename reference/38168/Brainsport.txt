@@ -1,0 +1,24 @@
+关卡集名称：Brainsport
+描述：
+Easy Level From Brainsport, Sokoban Clone or was that Brainstorm, I
+forgot the other levels if anyone remembers the orginals please email
+me.
+  
+信箱:ianmhammond@freeserve.co.uk
+版权:Ian Hammond
+
+Level - 1
+ #########
+ #@####  #
+ #$#     #
+ # #  ## #
+ # ## ## #
+## ## ## #
+#  ## ## #
+#     ## #
+####  ##.#
+   #######
+Title:Get Ready 4 Takeoff
+Author:Ian Hammond
+
+

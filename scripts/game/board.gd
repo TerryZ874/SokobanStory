@@ -16,6 +16,7 @@ var current_steps := 0
 var is_moving := false
 var game_over := false
 var move_history: Array = []
+var player_pivot: Node2D
 var board_offset := Vector2.ZERO
 var tile_size := 64
 
@@ -69,7 +70,10 @@ func _grid_to_pixel(col: float, row: float) -> Vector2:
 	)
 
 func start_level(level_id: int):
-	level = level_data.get_level(level_id)
+	if game_state.is_sandbox:
+		level = sandbox_data.get_level(level_id)
+	else:
+		level = level_data.get_level(level_id)
 	if level.is_empty():
 		return
 
@@ -107,6 +111,7 @@ func start_level(level_id: int):
 
 	hud.update_level_info(level.name)
 	hud.update_step_count(current_steps, level.step_limit)
+	hud.update_password_display()
 	hud.hide_overlays()
 
 func _clear_board():
@@ -160,18 +165,36 @@ func _make_player(col: int, row: int):
 	player_node.position = _grid_to_pixel(col, row)
 	player_pos = Vector2(col, row)
 
-	var vis = ColorRect.new()
-	vis.size = Vector2(tile_size - 8, tile_size - 8)
-	vis.position = Vector2(-(tile_size - 8) / 2, -(tile_size - 8) / 2)
-	vis.color = Color("#4ecdc4")
-	player_node.add_child(vis)
+	# Pivot node — rotates the whole unit around tile center
+	var pivot = Node2D.new()
+	pivot.name = "Pivot"
 
-	var col_shape = CollisionShape2D.new()
-	var shape = RectangleShape2D.new()
-	shape.size = Vector2(tile_size - 8, tile_size - 8)
-	col_shape.shape = shape
-	player_node.add_child(col_shape)
+	var s = tile_size - 8
+	var h = s * 0.5
 
+	# Main triangle body (cyan, pointing right)
+	var body = Polygon2D.new()
+	body.polygon = PackedVector2Array([
+		Vector2(h, 0),
+		Vector2(-h, -h * 0.7),
+		Vector2(-h, h * 0.7),
+	])
+	body.color = Color("#4ecdc4")
+	pivot.add_child(body)
+
+	# Red corner at the tip
+	var tip = Polygon2D.new()
+	var ts = 30.0
+	tip.polygon = PackedVector2Array([
+		Vector2(h, 0),
+		Vector2(h - ts * 1.3, -ts * 0.45),
+		Vector2(h - ts * 1.3, ts * 0.45),
+	])
+	tip.color = Color("#ff3333")
+	pivot.add_child(tip)
+
+	player_pivot = pivot
+	player_node.add_child(pivot)
 	entity_container.add_child(player_node)
 
 func _make_box(col: int, row: int):
@@ -233,6 +256,7 @@ func move_player(direction: Vector2):
 		box_positions[box_idx] = bnew
 		player_pos = target
 		current_steps += 1
+		player_pivot.rotation = direction.angle()
 
 		var tween = create_tween().set_parallel(true)
 		tween.tween_property(boxes[box_idx], "position", _grid_to_pixel(bx, by), 0.1)
@@ -249,6 +273,7 @@ func move_player(direction: Vector2):
 		_save_snapshot()
 		player_pos = target
 		current_steps += 1
+		player_pivot.rotation = direction.angle()
 
 		var tween = create_tween()
 		tween.tween_property(player_node, "position", _grid_to_pixel(tx, ty), 0.1)
