@@ -36,8 +36,9 @@ func update_password_display():
 	$PasswordHint.show()
 
 func update_step_count(steps: int, max_steps: int):
+	var remaining = max_steps - steps
 	var color = Color("#ffffff")
-	if steps > max_steps:
+	if steps > max_steps or remaining < 2:
 		color = Color("#ff4444")
 	step_label.text = "步数: " + str(steps) + " / " + str(max_steps)
 	step_label.add_theme_color_override("font_color", color)
