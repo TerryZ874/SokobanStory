@@ -2,6 +2,7 @@ extends Control
 
 func _ready():
 	$Title.add_theme_font_size_override("font_size", 64)
+	$VersionLabel.add_theme_color_override("font_color", Color("#808080"))
 	$StartBtn.pressed.connect(_on_start)
 	$SandboxBtn.pressed.connect(_on_sandbox)
 	$PasswordBtn.pressed.connect(_on_password_btn)

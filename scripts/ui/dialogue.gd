@@ -76,5 +76,14 @@ func _finish_dialogue():
 	if next_level <= level_data.get_level_count():
 		game_state.current_level_id = next_level
 		get_tree().change_scene_to_file("res://scenes/game.tscn")
-	else:
-		get_tree().change_scene_to_file("res://scenes/main.tscn")
+		return
+
+	# Check for epilogue / ending story
+	var epilogue = story_data.get_story(next_level)
+	if not epilogue.is_empty():
+		game_state.pending_story = epilogue
+		game_state.next_level_after_dialogue = next_level + 1
+		get_tree().change_scene_to_file("res://scenes/dialogue.tscn")
+		return
+
+	get_tree().change_scene_to_file("res://scenes/main.tscn")
