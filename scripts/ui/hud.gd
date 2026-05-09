@@ -21,6 +21,8 @@ func _ready():
 	defeat_retry_btn.pressed.connect(_on_restart)
 	$DefeatPanel/BackBtn.pressed.connect(_on_back)
 
+	victory_next_btn.add_theme_color_override("font_color", Color("#33ff33"))
+
 func update_level_info(name: String):
 	level_label.text = name
 

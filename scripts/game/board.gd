@@ -109,6 +109,13 @@ func start_level(level_id: int):
 	_clear_grid_state_entities()
 	_update_box_visuals()
 
+	# Player pulse animation to highlight which character you control
+	if player_pivot:
+		var tw = create_tween()
+		tw.tween_property(player_pivot, "scale", Vector2(1.5, 1.5), 0.2)
+		tw.tween_property(player_pivot, "scale", Vector2(0.8, 0.8), 0.2)
+		tw.tween_property(player_pivot, "scale", Vector2(1.0, 1.0), 0.2)
+
 	hud.update_level_info(level.name)
 	hud.update_step_count(current_steps, level.step_limit)
 	hud.update_password_display()
