@@ -25,6 +25,7 @@ var tile_size := 64
 @onready var target_container = $TargetContainer
 @onready var entity_container = $EntityContainer
 @onready var hud = $CanvasLayer/HUD
+@onready var _sb_data = get_node("/root/sandbox_data")
 
 func _ready():
 	start_level(game_state.current_level_id)
@@ -71,7 +72,7 @@ func _grid_to_pixel(col: float, row: float) -> Vector2:
 
 func start_level(level_id: int):
 	if game_state.is_sandbox:
-		level = sandbox_data.get_level(level_id)
+		level = _sb_data.get_level(level_id)
 	else:
 		level = level_data.get_level(level_id)
 	if level.is_empty():
