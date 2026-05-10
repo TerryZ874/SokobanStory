@@ -119,7 +119,7 @@ func _on_start():
 
 func _on_sandbox():
 	game_state.is_sandbox = true
-	game_state.current_level_id = 101
+	game_state.current_level_id = sandbox_data.START_LEVEL
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
 func _on_quit():

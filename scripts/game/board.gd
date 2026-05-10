@@ -4,6 +4,8 @@ enum CELL { FLOOR, WALL, BOX, PLAYER }
 
 const GAME_W := 1920
 const GAME_H := 1080
+const H_MARGIN := 120
+const V_MARGIN := 160
 
 var level: Dictionary
 var grid_state: Array
@@ -25,14 +27,13 @@ var tile_size := 64
 @onready var target_container = $TargetContainer
 @onready var entity_container = $EntityContainer
 @onready var hud = $CanvasLayer/HUD
-@onready var _sb_data = get_node("/root/sandbox_data")
 
 func _ready():
 	start_level(game_state.current_level_id)
 
 func _compute_tile_size(rows: int, cols: int) -> int:
-	var avail_w = GAME_W - 120
-	var avail_h = GAME_H - 160
+	var avail_w = GAME_W - H_MARGIN
+	var avail_h = GAME_H - V_MARGIN
 	var max_tile_w = avail_w / cols if cols > 0 else avail_w
 	var max_tile_h = avail_h / rows if rows > 0 else avail_h
 	return max(16, min(max_tile_w, max_tile_h))
@@ -72,7 +73,7 @@ func _grid_to_pixel(col: float, row: float) -> Vector2:
 
 func start_level(level_id: int):
 	if game_state.is_sandbox:
-		level = _sb_data.get_level(level_id)
+		level = sandbox_data.get_level(level_id)
 	else:
 		level = level_data.get_level(level_id)
 	if level.is_empty():

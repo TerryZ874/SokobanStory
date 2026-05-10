@@ -11,6 +11,9 @@ var advancing := false
 @onready var skip_btn = $SkipBtn
 @onready var continue_btn = $ContinueBtn
 
+const BLIP = preload("res://audio/sfx_message.mp3")
+var _blip_player: AudioStreamPlayer
+
 const SPEAKER_COLORS := {
 	"c01": Color("#4a9eff"),
 	"c02": Color("#4ecdc4"),
@@ -33,6 +36,10 @@ func _ready():
 	if dialogue_lines.is_empty():
 		_finish_dialogue()
 		return
+
+	_blip_player = AudioStreamPlayer.new()
+	_blip_player.stream = BLIP
+	add_child(_blip_player)
 
 	skip_btn.pressed.connect(_on_skip)
 	continue_btn.pressed.connect(_on_continue)
@@ -96,6 +103,8 @@ func _show_all_remaining():
 
 
 func _add_message(line: Dictionary):
+	_blip_player.play()
+
 	var is_player = line.speaker == PLAYER_ID
 	var char_data = story_data.get_character(line.speaker)
 	var char_name = char_data.get("name", line.speaker) if not char_data.is_empty() else line.speaker

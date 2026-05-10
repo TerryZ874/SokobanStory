@@ -8,7 +8,6 @@ extends Control
 @onready var victory_replay_btn = $VictoryPanel/ReplayBtn
 @onready var defeat_retry_btn = $DefeatPanel/RetryBtn
 @onready var password_label = $VictoryPanel/PasswordLabel
-@onready var _sb_data = get_node("/root/sandbox_data")
 
 func _ready():
 	hide_overlays()
@@ -54,7 +53,7 @@ func show_victory():
 
 	var next_id = game_state.current_level_id + 1
 	if game_state.is_sandbox:
-		var has_next_sandbox = not _sb_data.get_level(next_id).is_empty()
+		var has_next_sandbox = not sandbox_data.get_level(next_id).is_empty()
 		victory_next_btn.disabled = not has_next_sandbox
 	else:
 		var has_next = next_id <= level_data.get_level_count()
@@ -85,7 +84,7 @@ func _on_next_level():
 	var next_id = game_state.current_level_id + 1
 	hide_overlays()
 	if game_state.is_sandbox:
-		if not _sb_data.get_level(next_id).is_empty():
+		if not sandbox_data.get_level(next_id).is_empty():
 			get_board().start_level(next_id)
 		return
 	var story = story_data.get_story(game_state.current_level_id)
