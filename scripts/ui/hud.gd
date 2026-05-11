@@ -8,6 +8,8 @@ extends Control
 @onready var victory_replay_btn = $VictoryPanel/ReplayBtn
 @onready var defeat_retry_btn = $DefeatPanel/RetryBtn
 @onready var password_label = $VictoryPanel/PasswordLabel
+@onready var ai_difficulty_label = $AIDifficultyLabel
+@onready var player_difficulty_label = $PlayerDifficultyLabel
 
 func _ready():
 	hide_overlays()
@@ -29,10 +31,25 @@ func update_level_info(name: String):
 func update_password_display():
 	if game_state.is_sandbox:
 		$PasswordHint.hide()
+		ai_difficulty_label.hide()
+		player_difficulty_label.hide()
 		return
 	var pwd = game_state.generate_password(game_state.current_level_id)
 	$PasswordHint.text = "密码: " + pwd
 	$PasswordHint.show()
+	ai_difficulty_label.show()
+	player_difficulty_label.show()
+
+func update_difficulty_display(level: Dictionary):
+	if game_state.is_sandbox:
+		return
+	var ai_score = level.get("ai_difficulty", 0.0)
+	var player_score = level.get("player_difficulty", 0.0)
+	ai_difficulty_label.text = "AI难度: " + str(ai_score) + " / 10"
+	if player_score > 0:
+		player_difficulty_label.text = "玩家难度: " + str(player_score) + " / 10"
+	else:
+		player_difficulty_label.text = "玩家难度: ? / 10"
 
 func update_step_count(steps: int, max_steps: int):
 	var remaining = max_steps - steps

@@ -121,6 +121,7 @@ func start_level(level_id: int):
 	hud.update_level_info(level.name)
 	hud.update_step_count(current_steps, level.step_limit)
 	hud.update_password_display()
+	hud.update_difficulty_display(level)
 	hud.hide_overlays()
 
 func _clear_board():

@@ -55,6 +55,24 @@ offset_right = 420.0
 offset_bottom = 165.0
 theme_override_font_sizes/font_size = 32
 
+[node name="AIDifficultyLabel" type="Label" parent="CanvasLayer/HUD"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 170.0
+offset_right = 420.0
+offset_bottom = 210.0
+theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 28
+
+[node name="PlayerDifficultyLabel" type="Label" parent="CanvasLayer/HUD"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 210.0
+offset_right = 420.0
+offset_bottom = 250.0
+theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+
 [node name="UndoBtn" type="Button" parent="CanvasLayer/HUD"]
 layout_mode = 0
 offset_left = 760.0
