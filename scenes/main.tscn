@@ -19,11 +19,20 @@ offset_bottom = 1080.0
 [node name="Title" type="Label" parent="."]
 layout_mode = 0
 offset_left = 660.0
-offset_top = 240.0
+offset_top = 180.0
 offset_right = 1260.0
-offset_bottom = 340.0
+offset_bottom = 280.0
 text = "仓库番2060"
 horizontal_alignment = 1
+
+[node name="ContinueBtn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 840.0
+offset_top = 490.0
+offset_right = 1060.0
+offset_bottom = 550.0
+text = "继续游戏"
+theme_override_colors/font_color = Color(0.3, 1.0, 0.3, 1.0)
 
 [node name="StartBtn" type="Button" parent="."]
 layout_mode = 0
@@ -31,7 +40,7 @@ offset_left = 840.0
 offset_top = 570.0
 offset_right = 1060.0
 offset_bottom = 630.0
-text = "开始游戏"
+text = "新游戏"
 
 [node name="PasswordBtn" type="Button" parent="."]
 layout_mode = 0
@@ -107,6 +116,42 @@ offset_top = 30.0
 offset_right = 350.0
 offset_bottom = 70.0
 horizontal_alignment = 1
+
+[node name="ConfirmPanel" type="ColorRect" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 760.0
+offset_top = 340.0
+offset_right = 1160.0
+offset_bottom = 640.0
+color = Color(0, 0, 0, 0.9)
+
+[node name="Label" type="Label" parent="ConfirmPanel"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 80.0
+offset_right = 380.0
+offset_bottom = 160.0
+text = "是否删除存档\n并开始新游戏？"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="ConfirmBtn" type="Button" parent="ConfirmPanel"]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 190.0
+offset_right = 300.0
+offset_bottom = 240.0
+text = "确认"
+
+[node name="CancelBtn" type="Button" parent="ConfirmPanel"]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 260.0
+offset_right = 300.0
+offset_bottom = 310.0
+text = "取消"
 
 [node name="VersionLabel" type="Label" parent="."]
 layout_mode = 0

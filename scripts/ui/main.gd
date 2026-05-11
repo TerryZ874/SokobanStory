@@ -24,15 +24,27 @@ func _ready():
 	$Title.add_theme_font_size_override("font_size", 84)
 	$VersionLabel.add_theme_color_override("font_color", Color("#808080"))
 
-	for b in [$StartBtn, $PasswordBtn, $SandboxBtn, $QuitBtn]:
+	for b in [$ContinueBtn, $StartBtn, $PasswordBtn, $SandboxBtn, $QuitBtn]:
 		b.add_theme_font_size_override("font_size", 34)
 
+	# Continue button visibility
+	if save_manager.has_save():
+		save_manager.load_game()
+		if save_manager.game_completed:
+			$ContinueBtn.text = "继续游戏+"
+		$ContinueBtn.show()
+	else:
+		$ContinueBtn.hide()
+
+	$ContinueBtn.pressed.connect(_on_continue)
 	$StartBtn.pressed.connect(_on_start)
 	$SandboxBtn.pressed.connect(_on_sandbox)
 	$PasswordBtn.pressed.connect(_on_password_btn)
 	$QuitBtn.pressed.connect(_on_quit)
 	$PasswordPanel/ConfirmBtn.pressed.connect(_on_password_confirm)
 	$PasswordPanel/CancelBtn.pressed.connect(_on_password_cancel)
+	$ConfirmPanel/ConfirmBtn.pressed.connect(_on_confirm_new_game)
+	$ConfirmPanel/CancelBtn.pressed.connect(_on_cancel_new_game)
 
 	_all_lines = _generate_bg_lines()
 	_hide_menu()
@@ -41,7 +53,7 @@ func _ready():
 
 func _hide_menu():
 	for child in get_children():
-		if child == $BgLabel or child == $PasswordPanel:
+		if child == $BgLabel or child == $PasswordPanel or child == $ConfirmPanel:
 			continue
 		child.modulate = Color.TRANSPARENT
 
@@ -50,7 +62,7 @@ func _show_menu():
 	var tw = create_tween().set_parallel(true)
 	tw.set_trans(Tween.TRANS_CUBIC)
 	for child in get_children():
-		if child == $BgLabel or child == $PasswordPanel:
+		if child == $BgLabel or child == $PasswordPanel or child == $ConfirmPanel:
 			continue
 		tw.tween_property(child, "modulate", Color.WHITE, 0.25)
 
@@ -113,9 +125,25 @@ func _animate_bg():
 
 
 func _on_start():
+	if save_manager.has_save():
+		$ConfirmPanel.show()
+	else:
+		_on_confirm_new_game()
+
+func _on_continue():
+	save_manager.load_game()
 	game_state.is_sandbox = false
+	game_state.current_level_id = save_manager.current_level
+	get_tree().change_scene_to_file("res://scenes/game.tscn")
+
+func _on_confirm_new_game():
+	game_state.is_sandbox = false
+	save_manager.delete_save()
 	game_state.current_level_id = 1
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
+
+func _on_cancel_new_game():
+	$ConfirmPanel.hide()
 
 func _on_sandbox():
 	game_state.is_sandbox = true
@@ -151,3 +179,6 @@ func _input(event):
 			_on_password_confirm()
 		elif event.keycode == KEY_ESCAPE:
 			_on_password_cancel()
+	if $ConfirmPanel.visible and event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_ESCAPE:
+			_on_cancel_new_game()

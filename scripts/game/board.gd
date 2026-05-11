@@ -122,6 +122,9 @@ func start_level(level_id: int):
 	hud.update_step_count(current_steps, level.step_limit)
 	hud.update_password_display()
 	hud.update_difficulty_display(level)
+	if not game_state.is_sandbox:
+		save_manager.current_level = level_id
+		save_manager.save_game()
 	hud.hide_overlays()
 
 func _clear_board():

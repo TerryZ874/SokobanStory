@@ -11,8 +11,13 @@ extends Control
 @onready var ai_difficulty_label = $AIDifficultyLabel
 @onready var player_difficulty_label = $PlayerDifficultyLabel
 
+var _rating_buttons: Array[Button] = []
+var _rating_panel: Control = null
+var _rating_visible := false
+
 func _ready():
 	hide_overlays()
+	_setup_rating_panel()
 
 	$UndoBtn.pressed.connect(_on_undo)
 	$RestartBtn.pressed.connect(_on_restart)
@@ -40,11 +45,51 @@ func update_password_display():
 	ai_difficulty_label.show()
 	player_difficulty_label.show()
 
+func _setup_rating_panel():
+	player_difficulty_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	player_difficulty_label.gui_input.connect(_on_player_label_click)
+
+	_rating_panel = HBoxContainer.new()
+	_rating_panel.name = "RatingPanel"
+	_rating_panel.position = Vector2(20, 245)
+	_rating_panel.hide()
+	add_child(_rating_panel)
+
+	for i in range(1, 11):
+		var btn = Button.new()
+		btn.text = str(i)
+		btn.custom_minimum_size = Vector2(30, 28)
+		btn.theme_override_font_sizes["font_size"] = 16
+		var score = i
+		btn.pressed.connect(func(): _on_rating_selected(score))
+		_rating_panel.add_child(btn)
+		_rating_buttons.append(btn)
+
+func _on_player_label_click(event: InputEvent):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_rating_visible = not _rating_visible
+		_rating_panel.visible = _rating_visible
+
+func _on_rating_selected(score: int):
+	var lid = game_state.current_level_id
+	save_manager.set_player_difficulty(lid, score)
+	_rating_visible = false
+	_rating_panel.hide()
+	_reload_level()
+	player_difficulty_label.text = "玩家难度: " + str(score) + " / 10"
+
+func _reload_level():
+	var board = get_board()
+	if board:
+		var lv = board.level
+		if lv:
+			update_difficulty_display(lv)
+
 func update_difficulty_display(level: Dictionary):
 	if game_state.is_sandbox:
 		return
 	var ai_score = level.get("ai_difficulty", 0.0)
-	var player_score = level.get("player_difficulty", 0.0)
+	var player_score = save_manager.get_player_difficulty(game_state.current_level_id)
 	ai_difficulty_label.text = "AI难度: " + str(ai_score) + " / 10"
 	if player_score > 0:
 		player_difficulty_label.text = "玩家难度: " + str(player_score) + " / 10"

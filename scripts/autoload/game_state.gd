@@ -15,9 +15,9 @@ func generate_password(level_id: int) -> String:
 		n /= 36
 	return result
 
-# Called by board.gd on level completion — kept as stub since passwords replace saves
-func level_completed(_level_id: int, _steps: int):
-	pass
+func level_completed(level_id: int, _steps: int):
+	if not is_sandbox:
+		save_manager.set_level_completed(level_id)
 
 func validate_password(pwd: String) -> int:
 	pwd = pwd.strip_edges().to_lower()
