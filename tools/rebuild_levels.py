@@ -11,7 +11,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.bfs_solver import solve
 
-POOLS_DIR = "data/pools"
+POOLS_DIR = "data/pools/small"
 
 # ========== 1. 加载并分析社区关卡 ==========
 print("=== 阶段1: 加载并分析社区关卡 ===")

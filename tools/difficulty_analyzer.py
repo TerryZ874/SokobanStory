@@ -12,7 +12,7 @@ from collections import defaultdict
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.bfs_solver import solve
 
-POOLS_DIR = "data/pools"
+POOLS_DIR = "data/pools/small"
 
 
 def load_levels_from_pools(max_boxes=15):

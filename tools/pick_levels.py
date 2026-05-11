@@ -15,12 +15,12 @@ from tools.bfs_solver import solve
 analysis = json.load(open("data/pools/analysis_results.json"))
 analysis_by_id = {lv["id"]: lv for lv in analysis["levels"]}
 
-# 加载原始池数据
+POOLS_DIR = "data/pools/small"
 def load_raw_pools():
     """加载关卡池原始数据，并关联分析结果"""
     all_raw = []
     for i in range(1, 5):  # 1-4箱
-        path = f"data/pools/pool_{i}box.json"
+        path = f"{POOLS_DIR}/pool_{i}box.json"
         if os.path.exists(path):
             raw_data = json.load(open(path))
             if isinstance(raw_data, list):
@@ -140,7 +140,7 @@ print("=" * 60)
 # 需要读取原始pool文件找到完整的grid数据
 def get_original_level(boxes, pool_index):
     """从原始pool文件读取关卡数据"""
-    path = f"data/pools/pool_{boxes}box.json"
+    path = f"{POOLS_DIR}/pool_{boxes}box.json"
     raw = json.load(open(path))
     if isinstance(raw, list):
         return raw[pool_index]
@@ -154,7 +154,7 @@ analysis_id_to_raw = {}
 
 # 更好的方式：重新读取pool文件，找到索引位置
 for i in range(1, 5):
-    path = f"data/pools/pool_{i}box.json"
+    path = f"{POOLS_DIR}/pool_{i}box.json"
     if os.path.exists(path):
         raw_data = json.load(open(path))
         if isinstance(raw_data, list):
