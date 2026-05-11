@@ -3,7 +3,7 @@ extends Node
 const SAVE_PATH := "user://save.json"
 
 var current_level := 1
-var completed_levels: Array[int] = []
+var completed_levels = []
 var player_difficulty := {}
 var game_completed := false
 
@@ -53,7 +53,7 @@ func set_level_completed(level_id: int):
 	# Check if all main campaign levels are done
 	var main_count = level_data.get_level_count()
 	game_completed = true
-	for lid in main_count:
+	for lid in range(main_count):
 		if (lid + 1) not in completed_levels:
 			game_completed = false
 			break

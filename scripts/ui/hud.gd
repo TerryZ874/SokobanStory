@@ -59,7 +59,7 @@ func _setup_rating_panel():
 		var btn = Button.new()
 		btn.text = str(i)
 		btn.custom_minimum_size = Vector2(30, 28)
-		btn.theme_override_font_sizes["font_size"] = 16
+		btn.add_theme_font_size_override("font_size", 16)
 		var score = i
 		btn.pressed.connect(func(): _on_rating_selected(score))
 		_rating_panel.add_child(btn)
