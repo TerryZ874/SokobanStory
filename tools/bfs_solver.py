@@ -43,6 +43,16 @@ def solve(level):
 
     Returns (min_steps) or None if unsolvable.
     """
+    result = solve_detailed(level)
+    return result["steps"] if result else None
+
+
+def solve_detailed(level):
+    """
+    Like solve() but returns full stats dict:
+    {"steps": min_steps, "states": states_explored}
+    or None if unsolvable.
+    """
     rows, cols = level['rows'], level['cols']
     grid = [list(r) for r in level['grid']]
     targets = [(t[0], t[1]) for t in level['targets']]
@@ -85,11 +95,12 @@ def solve(level):
         (px, py), boxes_tuple, steps = q.popleft()
         boxes = list(boxes_tuple)
 
+        states_explored += 1
+
         # Win check
         if all(b in target_set for b in boxes):
-            return steps
+            return {"steps": steps, "states": states_explored}
 
-        states_explored += 1
         if states_explored > max_states:
             return None
 
@@ -132,7 +143,7 @@ def solve(level):
                     visited.add(new_state)
                     q.append(((nx, ny), boxes_tuple, steps + 1))
 
-    return None  # Unsolvable
+    return None  # Unsolvable by solve_detailed
 
 
 def validate_level(level):
