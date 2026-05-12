@@ -19,8 +19,3 @@ func _draw():
 	for pts in corners:
 		draw_line(pts[0], pts[1], color, lw)
 		draw_line(pts[1], pts[2], color, lw)
-
-	# Crosshair in center
-	var cx = s * 0.5
-	draw_line(Vector2(cx, g * 2.5), Vector2(cx, s - g * 2.5), Color(color.r, color.g, color.b, color.a * 0.5), max(1, lw * 0.4))
-	draw_line(Vector2(g * 2.5, cx), Vector2(s - g * 2.5, cx), Color(color.r, color.g, color.b, color.a * 0.5), max(1, lw * 0.4))

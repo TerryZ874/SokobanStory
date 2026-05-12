@@ -5,6 +5,13 @@ var current_index := 0
 var skip_pressed := false
 var showing := false
 var advancing := false
+var _text_revealing := false
+var _text_tween: Tween = null
+var _current_bubble: Label = null
+var _current_fultext: String = ""
+var _full_text: String = ""
+var _reveal_count: float = 0.0
+var _scramble_accum: float = 0.0
 
 @onready var message_list = $Scroll/MessageList
 @onready var scroll = $Scroll
@@ -50,6 +57,17 @@ func _ready():
 	_start_show_messages()
 
 
+func _process(delta):
+	if not _text_revealing or _current_bubble == null:
+		return
+
+	# Update scramble display every 0.1s
+	_scramble_accum += delta
+	if _scramble_accum >= 0.1:
+		_scramble_accum = 0.0
+		_update_scramble_text()
+
+
 func _start_show_messages():
 	showing = true
 	current_index = 0
@@ -75,10 +93,14 @@ func _show_next_message():
 	_add_message(line)
 	current_index += 1
 
-	# Wait two frames for layout to settle, then scroll to bottom
+	# Wait for layout to settle, then scroll to bottom
 	await get_tree().process_frame
 	await get_tree().process_frame
-	scroll.scroll_vertical = int(scroll.get_v_scroll_bar().max_value)
+	await get_tree().process_frame
+	# Lock bubble height so scramble text doesn't affect layout
+	if _current_bubble != null:
+		_current_bubble.custom_minimum_size = Vector2(700, _current_bubble.size.y)
+	_scroll_last_message_bottom()
 
 	advancing = false
 
@@ -95,7 +117,20 @@ func _show_all_remaining():
 
 	await get_tree().process_frame
 	await get_tree().process_frame
-	scroll.scroll_vertical = int(scroll.get_v_scroll_bar().max_value)
+	await get_tree().process_frame
+	# Lock all bubble heights so scramble text doesn't affect layout
+	for j in range(message_list.get_child_count()):
+		var row = message_list.get_child(j)
+		if not row is HBoxContainer:
+			continue
+		for k in range(row.get_child_count()):
+			var col = row.get_child(k)
+			if col is VBoxContainer:
+				for m in range(col.get_child_count()):
+					var bubble = col.get_child(m)
+					if bubble is Label and bubble.size.y > 0:
+						bubble.custom_minimum_size = bubble.size
+	_scroll_last_message_bottom()
 
 	showing = false
 	continue_btn.show()
@@ -155,7 +190,9 @@ func _add_message(line: Dictionary):
 
 	# Text bubble
 	var bubble = Label.new()
-	bubble.text = line.text
+	_current_fultext = line.text
+	_full_text = line.text
+	bubble.text = _full_text  # Set full text first for proper layout size
 	bubble.add_theme_color_override("font_color", Color.WHITE)
 	bubble.add_theme_font_size_override("font_size", 36)
 	bubble.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -172,6 +209,30 @@ func _add_message(line: Dictionary):
 
 	content.add_child(bubble)
 
+	# Start scramble reveal animation
+	_current_bubble = bubble
+	_text_revealing = true
+	_reveal_count = 0.0
+	_scramble_accum = 0.0
+	if _text_tween:
+		_text_tween.kill()
+	# Use tween_method to advance reveal count
+	_text_tween = create_tween()
+	_text_tween.set_process_mode(Tween.TWEEN_PROCESS_IDLE)
+	_text_tween.tween_method(
+		func(v): _reveal_count = v,
+		0.0,
+		float(_full_text.length()),
+		max(0.5, _full_text.length() * 0.033)
+	)
+	_text_tween.finished.connect(func():
+		_text_revealing = false
+		_text_tween = null
+		# Show final clean text
+		if _current_bubble:
+			_current_bubble.text = _full_text
+	)
+
 	if is_player:
 		row.add_child(spacer)
 		row.add_child(content)
@@ -186,23 +247,70 @@ func _add_message(line: Dictionary):
 	message_list.add_child(msg_spacer)
 
 
+func _scroll_last_message_bottom():
+	# Keep scrolling down until position stabilizes (layout fully settled)
+	for _i in 10:
+		var prev = scroll.scroll_vertical
+		scroll.scroll_vertical = 999999
+		await get_tree().process_frame
+		if scroll.scroll_vertical == prev:
+			break
+
+
+func _update_scramble_text():
+	if _current_bubble == null or _full_text.is_empty():
+		return
+	var rc = int(_reveal_count)
+	var result = ""
+	for i in range(_full_text.length()):
+		if i < rc:
+			result += _full_text[i]
+		else:
+			result += char(randi_range(33, 126))
+	_current_bubble.text = result
+
+
 func _input(event):
-	if not showing or advancing:
+	if not showing:
 		return
 
+	var click := false
+	var skip_key := false
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		if skip_btn.get_global_rect().has_point(event.global_position):
 			return
 		if continue_btn.visible and continue_btn.get_global_rect().has_point(event.global_position):
 			return
-		_show_next_message()
-
+		click = true
 	elif event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_SPACE, KEY_ENTER:
-				_show_next_message()
+				skip_key = true
 			KEY_ESCAPE:
 				_on_skip()
+				return
+
+	if not (click or skip_key):
+		return
+
+	# If text is still revealing, skip animation but don't advance
+	if _text_revealing:
+		_skip_text_reveal()
+		return
+
+	if advancing:
+		return
+
+	_show_next_message()
+
+
+func _skip_text_reveal():
+	if _text_tween:
+		_text_tween.kill()
+		_text_tween = null
+	_text_revealing = false
+	if _current_bubble:
+		_current_bubble.text = _full_text
 
 
 func _on_skip():

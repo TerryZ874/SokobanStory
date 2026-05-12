@@ -19,9 +19,16 @@ var current_steps := 0:
 		current_steps = value
 		_update_player_color()
 var is_moving := false
-var _player_body: Polygon2D
-var _player_tip: Polygon2D
+var _player_body: Node2D
 var _push_previews: Array = []
+var _reach_previews: Array = []
+var _is_auto_walking := false
+var _current_push_dests: Dictionary = {}
+var _current_dot_positions: Dictionary = {}
+var _pushable_boxes: Array = []
+var _pulse_time := 0.0
+var _movement_timer := 0.0
+signal player_moved
 var game_over := false
 var move_history: Array = []
 var player_pivot: Node2D
@@ -44,6 +51,28 @@ func _compute_tile_size(rows: int, cols: int) -> int:
 	var max_tile_h = avail_h / rows if rows > 0 else avail_h
 	return max(16, min(max_tile_w, max_tile_h))
 
+func _process(delta):
+	if game_over:
+		return
+	_pulse_time += delta
+	var t = (sin(_pulse_time * TAU) + 1.0) * 0.5
+	var s = lerp(0.9, 1.0, t)
+
+	# Pulse pushable boxes
+	for idx in _pushable_boxes:
+		if idx < boxes.size():
+			boxes[idx].scale = Vector2(s, s)
+
+	# Reset non-pushable boxes
+	for i in boxes.size():
+		if not i in _pushable_boxes:
+			boxes[i].scale = Vector2.ONE
+
+	if _movement_timer > 0:
+		_movement_timer -= delta
+		if _movement_timer <= 0:
+			is_moving = false
+
 func _unhandled_input(event: InputEvent):
 	var ke := event as InputEventKey
 	if ke == null or not ke.pressed or ke.echo:
@@ -54,7 +83,7 @@ func _unhandled_input(event: InputEvent):
 			hud._toggle_pause()
 		return
 
-	if is_moving or game_over:
+	if is_moving or game_over or _is_auto_walking:
 		return
 
 	var dir := Vector2.ZERO
@@ -76,11 +105,49 @@ func _unhandled_input(event: InputEvent):
 
 	if dir != Vector2.ZERO:
 		move_player(dir)
+		return
+
+func _input(event: InputEvent):
+	var me := event as InputEventMouseButton
+	if me == null or not me.pressed or me.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if is_moving or game_over or _is_auto_walking:
+		return
+
+	var grid = _pixel_to_grid(get_global_mouse_position())
+	var gx := int(grid.x)
+	var gy := int(grid.y)
+	if gx < 0 or gx >= level.cols or gy < 0 or gy >= level.rows:
+		return
+	var gp := Vector2(gx, gy)
+
+	# Click on adjacent pushable box → push
+	var dir = gp - player_pos
+	if dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+		var box_idx = _get_box_at(gp)
+		if box_idx >= 0:
+			var bnew = gp + dir
+			var bx = int(bnew.x)
+			var by = int(bnew.y)
+			if not (bx < 0 or bx >= level.cols or by < 0 or by >= level.rows or grid_state[by][bx] != CELL.FLOOR or _get_box_at(bnew) >= 0):
+				move_player(dir)
+				get_viewport().set_input_as_handled()
+				return
+
+	# Any click on map → try to walk there
+	_walk_to(gp)
+	get_viewport().set_input_as_handled()
 
 func _grid_to_pixel(col: float, row: float) -> Vector2:
 	return Vector2(
 		board_offset.x + col * tile_size + tile_size / 2,
 		board_offset.y + row * tile_size + tile_size / 2
+	)
+
+func _pixel_to_grid(pixel: Vector2) -> Vector2:
+	return Vector2(
+		floor((pixel.x - board_offset.x) / tile_size),
+		floor((pixel.y - board_offset.y) / tile_size)
 	)
 
 func start_level(level_id: int):
@@ -99,6 +166,8 @@ func start_level(level_id: int):
 	current_steps = 0
 	is_moving = false
 	game_over = false
+	_pulse_time = 0.0
+	_movement_timer = 0.0
 
 	for t in level.targets:
 		targets.append(Vector2(t[0], t[1]))
@@ -137,12 +206,17 @@ func start_level(level_id: int):
 		save_manager.save_game()
 	hud.hide_overlays()
 	call_deferred("_update_push_preview")
+	call_deferred("_update_reachability_preview")
 
 func _clear_board():
 	if player_node:
 		player_node.queue_free()
 		player_node = null
 	_push_previews.clear()
+	_reach_previews.clear()
+	_current_push_dests.clear()
+	_current_dot_positions.clear()
+	_pushable_boxes.clear()
 	for c in entity_container.get_children():
 		c.queue_free()
 	for c in wall_container.get_children():
@@ -193,30 +267,13 @@ func _make_player(col: int, row: int):
 	pivot.name = "Pivot"
 
 	var s = tile_size - 8
-	var h = s * 0.5
 
-	# Main triangle body (cyan, pointing right)
-	var body = Polygon2D.new()
-	body.polygon = PackedVector2Array([
-		Vector2(h, 0),
-		Vector2(-h, -h * 0.7),
-		Vector2(-h, h * 0.7),
-	])
+	# Circle body (cyan, 50% of tile)
+	var body = preload("res://scripts/game/player_circle.gd").new()
+	body.tile_size = tile_size
 	body.color = Color("#4ecdc4")
 	_player_body = body
 	pivot.add_child(body)
-
-	# Red corner at the tip
-	var tip = Polygon2D.new()
-	var ts = 30.0
-	tip.polygon = PackedVector2Array([
-		Vector2(h, 0),
-		Vector2(h - ts * 1.3, -ts * 0.45),
-		Vector2(h - ts * 1.3, ts * 0.45),
-	])
-	tip.color = Color("#ff3333")
-	_player_tip = tip
-	pivot.add_child(tip)
 
 	player_pivot = pivot
 
@@ -288,6 +345,7 @@ func move_player(direction: Vector2):
 		tween.tween_property(boxes[box_idx], "position", _grid_to_pixel(bx, by), 0.1)
 		tween.tween_property(player_node, "position", _grid_to_pixel(tx, ty), 0.1)
 		is_moving = true
+		_movement_timer = 1.0
 		tween.finished.connect(_on_tween_done)
 
 		_update_box_visuals()
@@ -304,6 +362,7 @@ func move_player(direction: Vector2):
 		var tween = create_tween()
 		tween.tween_property(player_node, "position", _grid_to_pixel(tx, ty), 0.1)
 		is_moving = true
+		_movement_timer = 1.0
 		tween.finished.connect(_on_tween_done)
 
 		hud.update_step_count(current_steps, level.step_limit)
@@ -337,6 +396,7 @@ func undo():
 
 	_update_box_visuals()
 	_update_push_preview()
+	_update_reachability_preview()
 	hud.update_step_count(current_steps, level.step_limit)
 
 func _update_box_visuals():
@@ -354,7 +414,13 @@ func _update_push_preview():
 	if game_over:
 		return
 
+	_current_push_dests.clear()
 	var dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+
+	# Reset old pushable boxes
+	var prev_pushable = _pushable_boxes.duplicate()
+	_pushable_boxes.clear()
+
 	var idx := 0
 	for dir in dirs:
 		var box_cell = player_pos + dir
@@ -371,27 +437,186 @@ func _update_push_preview():
 		if _get_box_at(box_cell) < 0 or _get_box_at(dest_cell) >= 0 or grid_state[dy][dx] != CELL.FLOOR:
 			continue
 
+		# Track this box as pushable
+		var bi = _get_box_at(box_cell)
+		if bi >= 0:
+			_pushable_boxes.append(bi)
+			# Add direction arrow on the box
+			var b = boxes[bi]
+			var arrow = b.get_node_or_null("DirectionArrow")
+			if not arrow:
+				arrow = Polygon2D.new()
+				arrow.name = "DirectionArrow"
+				var as_ = tile_size * 0.24
+				arrow.polygon = PackedVector2Array([
+					Vector2(as_, 0),
+					Vector2(-as_, -as_ * 0.6),
+					Vector2(-as_, as_ * 0.6)
+				])
+				arrow.color = Color("#666666")
+				b.add_child(arrow)
+			arrow.rotation = dir.angle()
+			arrow.show()
+
 		# Get or create preview rect
 		if idx >= _push_previews.size():
 			var p = ColorRect.new()
 			p.size = Vector2(tile_size - 8, tile_size - 8)
-			p.color = Color("#d4a574", 0.35)
+			p.color = Color("#d4a574", 0.2)
+			p.pivot_offset = p.size / 2
 			entity_container.add_child(p)
 			_push_previews.append(p)
 		var p = _push_previews[idx]
-		# Start at box position, slide to destination over 0.1s
-		var box_px = _grid_to_pixel(bx, by) - p.size / 2
+		_current_push_dests[dest_cell] = dir
 		var dest_px = _grid_to_pixel(dx, dy) - p.size / 2
-		p.position = box_px
+		p.scale = Vector2.ONE
+		p.position = dest_px
 		p.show()
-		var tw = create_tween()
-		tw.tween_property(p, "position", dest_px, 0.1)
 		idx += 1
 
 	# Hide unused previews
 	while idx < _push_previews.size():
 		_push_previews[idx].hide()
 		idx += 1
+
+	# Reset boxes that are no longer pushable
+	for bi in prev_pushable:
+		if not bi in _pushable_boxes and bi < boxes.size():
+			boxes[bi].scale = Vector2.ONE
+			var arr = boxes[bi].get_node_or_null("DirectionArrow")
+			if arr:
+				arr.hide()
+
+func _update_reachability_preview():
+	if game_over or level.is_empty():
+		return
+
+	# BFS from player_pos through floor cells, avoiding boxes and walls
+	var reachable = {}
+	var queue = [player_pos]
+	reachable[player_pos] = true
+	while queue.size() > 0:
+		var current = queue.pop_front()
+		for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+			var next_cell = current + dir
+			var nx = int(next_cell.x)
+			var ny = int(next_cell.y)
+			if nx < 0 or nx >= level.cols or ny < 0 or ny >= level.rows:
+				continue
+			if grid_state[ny][nx] == CELL.WALL:
+				continue
+			if next_cell in reachable:
+				continue
+			# Boxes block movement
+			var blocked = false
+			for bp in box_positions:
+				if bp == next_cell:
+					blocked = true
+					break
+			if blocked:
+				continue
+			reachable[next_cell] = true
+			queue.append(next_cell)
+
+	# Find valid stand positions: reachable floor cells adjacent to boxes
+	var stand_positions = {}
+	for bp in box_positions:
+		for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+			var sp = bp + dir
+			if sp == player_pos:
+				continue
+			var sx = int(sp.x)
+			var sy = int(sp.y)
+			if sx < 0 or sx >= level.cols or sy < 0 or sy >= level.rows:
+				continue
+			if grid_state[sy][sx] == CELL.WALL:
+				continue
+			# Cell occupied by another box
+			var occupied = false
+			for obp in box_positions:
+				if obp == sp:
+					occupied = true
+					break
+			if occupied:
+				continue
+			if reachable.has(sp):
+				stand_positions[sp] = true
+
+	_current_dot_positions = stand_positions.duplicate()
+	# Show/hide reachability previews
+	var idx := 0
+	for pos in stand_positions.keys():
+		if idx >= _reach_previews.size():
+			var p = preload("res://scripts/game/reach_dot.gd").new()
+			p.tile_size = tile_size
+			entity_container.add_child(p)
+			_reach_previews.append(p)
+		var p = _reach_previews[idx]
+		p.position = _grid_to_pixel(pos.x, pos.y)
+		p.show()
+		idx += 1
+
+	while idx < _reach_previews.size():
+		_reach_previews[idx].hide()
+		idx += 1
+
+func _find_path(from_pos: Vector2, to_pos: Vector2) -> Array:
+	if from_pos == to_pos:
+		return [from_pos]
+
+	var came_from = {}
+	var queue = [from_pos]
+	came_from[from_pos] = null
+
+	while queue.size() > 0:
+		var current = queue.pop_front()
+		if current == to_pos:
+			var path = []
+			var node = to_pos
+			while node != null:
+				path.append(node)
+				node = came_from.get(node)
+			path.reverse()
+			return path
+
+		for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+			var next_cell = current + dir
+			var nx = int(next_cell.x)
+			var ny = int(next_cell.y)
+			if nx < 0 or nx >= level.cols or ny < 0 or ny >= level.rows:
+				continue
+			if grid_state[ny][nx] == CELL.WALL:
+				continue
+			if came_from.has(next_cell):
+				continue
+			# Boxes block movement
+			var blocked = false
+			for bp in box_positions:
+				if bp == next_cell:
+					blocked = true
+					break
+			if blocked:
+				continue
+			came_from[next_cell] = current
+			queue.append(next_cell)
+
+	return []
+
+func _walk_to(target: Vector2):
+	var path = _find_path(player_pos, target)
+	if path.is_empty() or path.size() < 2:
+		return
+	_walk_path(path)
+
+func _walk_path(path: Array):
+	_is_auto_walking = true
+	for i in range(1, path.size()):
+		if game_over:
+			break
+		var dir = path[i] - path[i-1]
+		move_player(dir)
+		await player_moved
+	_is_auto_walking = false
 
 func _check_game_state():
 	var won = true
@@ -414,6 +639,8 @@ func _check_game_state():
 func _on_tween_done():
 	is_moving = false
 	_update_push_preview()
+	_update_reachability_preview()
+	player_moved.emit()
 
 func _go_to_next_dialogue():
 	var next_id = game_state.current_level_id + 1

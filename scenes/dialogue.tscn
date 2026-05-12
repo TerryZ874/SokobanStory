@@ -22,7 +22,7 @@ layout_mode = 0
 offset_left = 400.0
 offset_top = 200.0
 offset_right = 1520.0
-offset_bottom = 880.0
+offset_bottom = 980.0
 
 [node name="MessageList" type="VBoxContainer" parent="Scroll"]
 layout_mode = 2
