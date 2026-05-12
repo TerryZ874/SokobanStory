@@ -2,7 +2,7 @@
   "levels": [
 	{
 	  "id": 1,
-	  "name": "\u7b2c\u4e00\u5173\uff1a\u521d\u8bc6\u63a8\u7bb1",
+	  "name": "第0001关：初识推箱",
 	  "cols": 5,
 	  "rows": 3,
 	  "step_limit": 40,
@@ -41,7 +41,7 @@
 	},
 	{
 	  "id": 2,
-	  "name": "\u7b2c\u4e8c\u5173\uff1aU \u5f62\u5f2f",
+	  "name": "第0002关：U 形弯",
 	  "cols": 6,
 	  "rows": 3,
 	  "step_limit": 40,
@@ -83,7 +83,7 @@
 	},
 	{
 	  "id": 3,
-	  "name": "\u7b2c\u4e09\u5173\uff1a\u53cc\u7bb1\u534f\u4f5c",
+	  "name": "第0003关：双箱协作",
 	  "cols": 7,
 	  "rows": 3,
 	  "step_limit": 80,
@@ -132,7 +132,7 @@
 	},
 	{
 	  "id": 4,
-	  "name": "\u7b2c\u56db\u5173\uff1a\u521d\u63a2\u53cc\u7bb1",
+	  "name": "第0004关：初探双箱",
 	  "cols": 7,
 	  "rows": 8,
 	  "step_limit": 60,
@@ -230,7 +230,7 @@
 	},
 	{
 	  "id": 5,
-	  "name": "\u7b2c\u4e94\u5173\uff1a\u53cc\u7bb1\u8ff7\u9635",
+	  "name": "第0005关：双箱迷阵",
 	  "cols": 6,
 	  "rows": 5,
 	  "step_limit": 96,
@@ -296,7 +296,7 @@
 	},
 	{
 	  "id": 6,
-	  "name": "\u7b2c\u516d\u5173\uff1a\u4e09\u7bb1\u8d77\u624b",
+	  "name": "第0006关：三箱起手",
 	  "cols": 7,
 	  "rows": 5,
 	  "step_limit": 90,
@@ -371,7 +371,7 @@
 	},
 	{
 	  "id": 7,
-	  "name": "\u7b2c\u4e03\u5173\uff1a\u4e09\u7bb1\u63a2\u7d22",
+	  "name": "第0007关：三箱探索",
 	  "cols": 7,
 	  "rows": 8,
 	  "step_limit": 126,
@@ -473,7 +473,7 @@
 	},
 	{
 	  "id": 8,
-	  "name": "\u7b2c\u516b\u5173\uff1a\u4e09\u7bb1\u5939\u51fb",
+	  "name": "第0008关：三箱夹击",
 	  "cols": 6,
 	  "rows": 5,
 	  "step_limit": 80,
@@ -543,7 +543,7 @@
 	},
 	{
 	  "id": 9,
-	  "name": "\u7b2c\u4e5d\u5173\uff1a\u4e09\u7bb1\u8fc2\u56de",
+	  "name": "第0009关：三箱迂回",
 	  "cols": 7,
 	  "rows": 7,
 	  "step_limit": 147,
@@ -636,7 +636,7 @@
 	},
 	{
 	  "id": 10,
-	  "name": "\u7b2c\u5341\u5173\uff1a\u4e09\u7bb1\u7edd\u5883",
+	  "name": "第0010关：三箱绝境",
 	  "cols": 7,
 	  "rows": 7,
 	  "step_limit": 162,
@@ -729,7 +729,7 @@
 	},
 	{
 	  "id": 11,
-	  "name": "\u7b2c\u5341\u4e00\u5173\uff1a\u56db\u7bb1\u521d\u73b0",
+	  "name": "第0011关：四箱初现",
 	  "cols": 7,
 	  "rows": 5,
 	  "step_limit": 126,
@@ -808,7 +808,7 @@
 	},
 	{
 	  "id": 12,
-	  "name": "\u7b2c\u5341\u4e8c\u5173\uff1a\u56db\u7bb1\u56f0\u5c40",
+	  "name": "第0012关：四箱困局",
 	  "cols": 7,
 	  "rows": 6,
 	  "step_limit": 144,
@@ -896,7 +896,7 @@
 	},
 	{
 	  "id": 13,
-	  "name": "\u7b2c\u5341\u4e09\u5173\uff1a\u56db\u7bb1\u8ff7\u5bab",
+	  "name": "第0013关：四箱迷宫",
 	  "cols": 11,
 	  "rows": 9,
 	  "step_limit": 154,
@@ -1047,7 +1047,7 @@
 	},
 	{
 	  "id": 14,
-	  "name": "\u7b2c\u5341\u56db\u5173\uff1a\u56db\u7bb1\u63a8\u6f14",
+	  "name": "第0014关：四箱推演",
 	  "cols": 6,
 	  "rows": 6,
 	  "step_limit": 165,
@@ -1129,7 +1129,7 @@
 	},
 	{
 	  "id": 15,
-	  "name": "\u7b2c\u5341\u4e94\u5173\uff1a\u56db\u7bb1\u8212\u5c55",
+	  "name": "第0015关：四箱舒展",
 	  "cols": 8,
 	  "rows": 8,
 	  "step_limit": 156,
@@ -1243,7 +1243,7 @@
 	},
 	{
 	  "id": 16,
-	  "name": "\u7b2c\u5341\u516d\u5173\uff1a\u56db\u7bb1\u98ce\u66b4",
+	  "name": "第0016关：四箱风暴",
 	  "cols": 8,
 	  "rows": 8,
 	  "step_limit": 185,
@@ -1357,7 +1357,7 @@
 	},
 	{
 	  "id": 17,
-	  "name": "\u7b2c\u5341\u4e03\u5173\uff1a\u56db\u7bb1\u6df1\u6e0a",
+	  "name": "第0017关：四箱深渊",
 	  "cols": 10,
 	  "rows": 10,
 	  "step_limit": 130,
@@ -1511,7 +1511,7 @@
 	},
 	{
 	  "id": 18,
-	  "name": "\u7b2c\u5341\u516b\u5173\uff1a\u56db\u7bb1\u70bc\u72f1",
+	  "name": "第0018关：四箱炼狱",
 	  "cols": 6,
 	  "rows": 6,
 	  "step_limit": 148,
@@ -1593,7 +1593,7 @@
 	},
 	{
 	  "id": 19,
-	  "name": "\u7b2c\u5341\u4e5d\u5173\uff1a\u9ece\u660e\u4e4b\u524d",
+	  "name": "第0019关：黎明之前",
 	  "cols": 10,
 	  "rows": 7,
 	  "step_limit": 145,
@@ -1711,7 +1711,7 @@
 	},
 	{
 	  "id": 20,
-	  "name": "\u7b2c\u4e8c\u5341\u5173\uff1a\u7ec8\u5c40\u4e4b\u6218",
+	  "name": "第0020关：终局之战",
 	  "cols": 8,
 	  "rows": 8,
 	  "step_limit": 141,

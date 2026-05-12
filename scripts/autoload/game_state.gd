@@ -3,7 +3,7 @@ extends Node
 var current_level_id := 1
 var pending_story: Array = []
 var next_level_after_dialogue: int = 1
-var is_sandbox := false
+var is_password_mode := false
 
 const PASS_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz"
 
@@ -15,9 +15,9 @@ func generate_password(level_id: int) -> String:
 		n /= 36
 	return result
 
-func level_completed(level_id: int, _steps: int):
-	if not is_sandbox:
-		save_manager.set_level_completed(level_id)
+func level_completed(level_id: int, steps: int):
+	save_manager.set_level_completed(level_id)
+	save_manager.set_level_steps(level_id, steps)
 
 func validate_password(pwd: String) -> int:
 	pwd = pwd.strip_edges().to_lower()

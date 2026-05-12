@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://ch2nx0vyy1qsx"]
+[gd_scene load_steps=4 format=3 uid="uid://ch2nx0vyy1qsx"]
 
 [ext_resource type="Script" uid="uid://t1g88cet1kvw" path="res://scripts/game/board.gd" id="1"]
 [ext_resource type="Script" uid="uid://cowyndlnnxrwu" path="res://scripts/ui/hud.gd" id="2"]
+[ext_resource type="Script" uid="uid://4gmrkfwtrs2r" path="res://scripts/ui/pause_panel.gd" id="3"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1")
@@ -75,29 +76,23 @@ theme_override_font_sizes/font_size = 28
 
 [node name="UndoBtn" type="Button" parent="CanvasLayer/HUD"]
 layout_mode = 0
-offset_left = 760.0
-offset_top = 1035.0
-offset_right = 860.0
-offset_bottom = 1070.0
-text = "撤回"
+offset_left = 800.0
+offset_top = 1020.0
+offset_right = 950.0
+offset_bottom = 1065.0
+theme_override_font_sizes/font_size = 28
+text = "退回-Z"
 
 [node name="RestartBtn" type="Button" parent="CanvasLayer/HUD"]
 layout_mode = 0
-offset_left = 870.0
-offset_top = 1035.0
-offset_right = 970.0
-offset_bottom = 1070.0
+offset_left = 970.0
+offset_top = 1020.0
+offset_right = 1120.0
+offset_bottom = 1065.0
+theme_override_font_sizes/font_size = 28
 text = "重来"
 
-[node name="BackBtn" type="Button" parent="CanvasLayer/HUD"]
-layout_mode = 0
-offset_left = 980.0
-offset_top = 1035.0
-offset_right = 1080.0
-offset_bottom = 1070.0
-text = "返回"
-
-[node name="VictoryPanel" type="ColorRect" parent="CanvasLayer/HUD"]
+[node name="PausePanel" type="ColorRect" parent="CanvasLayer/HUD"]
 visible = false
 layout_mode = 0
 offset_left = 760.0
@@ -105,42 +100,35 @@ offset_top = 340.0
 offset_right = 1160.0
 offset_bottom = 740.0
 color = Color(0, 0, 0, 0.85)
+script = ExtResource("3")
 
-[node name="Label" type="Label" parent="CanvasLayer/HUD/VictoryPanel"]
+[node name="Label" type="Label" parent="CanvasLayer/HUD/PausePanel"]
 layout_mode = 0
 offset_left = 50.0
 offset_top = 40.0
 offset_right = 350.0
 offset_bottom = 80.0
-text = "恭喜过关！"
+text = "游戏暂停"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PasswordLabel" type="Label" parent="CanvasLayer/HUD/VictoryPanel"]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 90.0
-offset_right = 350.0
-offset_bottom = 120.0
-horizontal_alignment = 1
-
-[node name="NextBtn" type="Button" parent="CanvasLayer/HUD/VictoryPanel"]
+[node name="ResumeBtn" type="Button" parent="CanvasLayer/HUD/PausePanel"]
 layout_mode = 0
 offset_left = 100.0
 offset_top = 120.0
 offset_right = 300.0
 offset_bottom = 165.0
-text = "下一关"
+text = "继续游戏"
 
-[node name="ReplayBtn" type="Button" parent="CanvasLayer/HUD/VictoryPanel"]
+[node name="RestartBtn" type="Button" parent="CanvasLayer/HUD/PausePanel"]
 layout_mode = 0
 offset_left = 100.0
 offset_top = 190.0
 offset_right = 300.0
 offset_bottom = 235.0
-text = "重玩"
+text = "重来"
 
-[node name="BackBtn" type="Button" parent="CanvasLayer/HUD/VictoryPanel"]
+[node name="BackBtn" type="Button" parent="CanvasLayer/HUD/PausePanel"]
 layout_mode = 0
 offset_left = 100.0
 offset_top = 260.0

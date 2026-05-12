@@ -19,9 +19,9 @@ offset_bottom = 1080.0
 [node name="Title" type="Label" parent="."]
 layout_mode = 0
 offset_left = 660.0
-offset_top = 180.0
+offset_top = 270.0
 offset_right = 1260.0
-offset_bottom = 280.0
+offset_bottom = 370.0
 text = "仓库番2060"
 horizontal_alignment = 1
 
@@ -42,21 +42,21 @@ offset_right = 1060.0
 offset_bottom = 630.0
 text = "新游戏"
 
-[node name="PasswordBtn" type="Button" parent="."]
+[node name="AlbumBtn" type="Button" parent="."]
 layout_mode = 0
 offset_left = 840.0
 offset_top = 655.0
 offset_right = 1060.0
 offset_bottom = 715.0
-text = "输入密码"
+text = "关卡图鉴"
 
-[node name="SandboxBtn" type="Button" parent="."]
+[node name="PasswordBtn" type="Button" parent="."]
 layout_mode = 0
 offset_left = 840.0
 offset_top = 740.0
 offset_right = 1060.0
 offset_bottom = 800.0
-text = "沙盒关卡"
+text = "输入密码"
 
 [node name="QuitBtn" type="Button" parent="."]
 layout_mode = 0

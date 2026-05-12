@@ -14,8 +14,14 @@ var player_node: Area2D
 var boxes: Array = []
 var box_positions: Array = []
 var targets: Array = []
-var current_steps := 0
+var current_steps := 0:
+	set(value):
+		current_steps = value
+		_update_player_color()
 var is_moving := false
+var _player_body: Polygon2D
+var _player_tip: Polygon2D
+var _push_previews: Array = []
 var game_over := false
 var move_history: Array = []
 var player_pivot: Node2D
@@ -42,6 +48,12 @@ func _unhandled_input(event: InputEvent):
 	var ke := event as InputEventKey
 	if ke == null or not ke.pressed or ke.echo:
 		return
+
+	if ke.keycode == KEY_ESCAPE:
+		if not game_over:
+			hud._toggle_pause()
+		return
+
 	if is_moving or game_over:
 		return
 
@@ -72,10 +84,7 @@ func _grid_to_pixel(col: float, row: float) -> Vector2:
 	)
 
 func start_level(level_id: int):
-	if game_state.is_sandbox:
-		level = sandbox_data.get_level(level_id)
-	else:
-		level = level_data.get_level(level_id)
+	level = level_data.get_level(level_id)
 	if level.is_empty():
 		return
 
@@ -110,6 +119,7 @@ func start_level(level_id: int):
 	_create_player_and_boxes()
 	_clear_grid_state_entities()
 	_update_box_visuals()
+	_update_player_color()
 
 	# Player pulse animation to highlight which character you control
 	if player_pivot:
@@ -122,15 +132,17 @@ func start_level(level_id: int):
 	hud.update_step_count(current_steps, level.step_limit)
 	hud.update_password_display()
 	hud.update_difficulty_display(level)
-	if not game_state.is_sandbox:
+	if not game_state.is_password_mode:
 		save_manager.current_level = level_id
 		save_manager.save_game()
 	hud.hide_overlays()
+	call_deferred("_update_push_preview")
 
 func _clear_board():
 	if player_node:
 		player_node.queue_free()
 		player_node = null
+	_push_previews.clear()
 	for c in entity_container.get_children():
 		c.queue_free()
 	for c in wall_container.get_children():
@@ -157,11 +169,9 @@ func _render_board():
 				wall_container.add_child(w)
 
 	for t in targets:
-		var m = ColorRect.new()
-		var s = tile_size * 0.5
-		m.size = Vector2(s, s)
-		m.position = board_offset + Vector2(t.x * tile_size + (tile_size - s) * 0.5, t.y * tile_size + (tile_size - s) * 0.5)
-		m.color = Color("#ff6b6b")
+		var m = preload("res://scripts/game/target_marker.gd").new()
+		m.tile_size = tile_size
+		m.position = board_offset + Vector2(t.x * tile_size, t.y * tile_size)
 		target_container.add_child(m)
 
 func _create_player_and_boxes():
@@ -193,6 +203,7 @@ func _make_player(col: int, row: int):
 		Vector2(-h, h * 0.7),
 	])
 	body.color = Color("#4ecdc4")
+	_player_body = body
 	pivot.add_child(body)
 
 	# Red corner at the tip
@@ -204,9 +215,11 @@ func _make_player(col: int, row: int):
 		Vector2(h - ts * 1.3, ts * 0.45),
 	])
 	tip.color = Color("#ff3333")
+	_player_tip = tip
 	pivot.add_child(tip)
 
 	player_pivot = pivot
+
 	player_node.add_child(pivot)
 	entity_container.add_child(player_node)
 
@@ -323,12 +336,62 @@ func undo():
 		boxes[i].position = _grid_to_pixel(box_positions[i].x, box_positions[i].y)
 
 	_update_box_visuals()
+	_update_push_preview()
 	hud.update_step_count(current_steps, level.step_limit)
 
 func _update_box_visuals():
 	for i in boxes.size():
 		var on_target = box_positions[i] in targets
 		boxes[i].is_on_target = on_target
+
+func _update_player_color():
+	if not _player_body or level.is_empty():
+		return
+	var ratio = float(max(0, level.step_limit - current_steps)) / level.step_limit
+	_player_body.color = Color("#4ecdc4").lerp(Color("#888888"), 1.0 - ratio)
+
+func _update_push_preview():
+	if game_over:
+		return
+
+	var dirs = [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]
+	var idx := 0
+	for dir in dirs:
+		var box_cell = player_pos + dir
+		var dest_cell = box_cell + dir
+		var bx = int(box_cell.x)
+		var by = int(box_cell.y)
+		var dx = int(dest_cell.x)
+		var dy = int(dest_cell.y)
+
+		if bx < 0 or bx >= level.cols or by < 0 or by >= level.rows:
+			continue
+		if dx < 0 or dx >= level.cols or dy < 0 or dy >= level.rows:
+			continue
+		if _get_box_at(box_cell) < 0 or _get_box_at(dest_cell) >= 0 or grid_state[dy][dx] != CELL.FLOOR:
+			continue
+
+		# Get or create preview rect
+		if idx >= _push_previews.size():
+			var p = ColorRect.new()
+			p.size = Vector2(tile_size - 8, tile_size - 8)
+			p.color = Color("#d4a574", 0.35)
+			entity_container.add_child(p)
+			_push_previews.append(p)
+		var p = _push_previews[idx]
+		# Start at box position, slide to destination over 0.1s
+		var box_px = _grid_to_pixel(bx, by) - p.size / 2
+		var dest_px = _grid_to_pixel(dx, dy) - p.size / 2
+		p.position = box_px
+		p.show()
+		var tw = create_tween()
+		tw.tween_property(p, "position", dest_px, 0.1)
+		idx += 1
+
+	# Hide unused previews
+	while idx < _push_previews.size():
+		_push_previews[idx].hide()
+		idx += 1
 
 func _check_game_state():
 	var won = true
@@ -339,9 +402,9 @@ func _check_game_state():
 
 	if won:
 		game_over = true
-		await get_tree().create_timer(0.5).timeout
-		hud.show_victory()
 		game_state.level_completed(level.id, current_steps)
+		await get_tree().create_timer(0.5).timeout
+		_go_to_next_dialogue()
 		return
 
 	if current_steps > level.step_limit:
@@ -350,6 +413,22 @@ func _check_game_state():
 
 func _on_tween_done():
 	is_moving = false
+	_update_push_preview()
+
+func _go_to_next_dialogue():
+	var next_id = game_state.current_level_id + 1
+	if game_state.is_password_mode:
+		game_state.is_password_mode = false
+		get_tree().change_scene_to_file("res://scenes/main.tscn")
+		return
+	var story = story_data.get_story(game_state.current_level_id)
+	if not story.is_empty():
+		game_state.pending_story = story
+		game_state.next_level_after_dialogue = next_id
+		get_tree().change_scene_to_file("res://scenes/dialogue.tscn")
+	else:
+		if next_id <= level_data.get_level_count():
+			start_level(next_id)
 
 func restart_level():
 	start_level(level.id)

@@ -232,4 +232,7 @@ func _finish_dialogue():
 		get_tree().change_scene_to_file("res://scenes/dialogue.tscn")
 		return
 
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	if save_manager.game_completed:
+		get_tree().change_scene_to_file("res://scenes/game_complete.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/main.tscn")
