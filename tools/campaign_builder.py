@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 POOL_DIR = "data/pools/small"
 CACHE_FILE = "data/pools/scored_levels.json"
+META_FILE = "data/levels_meta.json"
 OUTPUT_FILE = "data/levels.json"
 
 
@@ -493,6 +494,15 @@ def main():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump({"levels": all_levels}, f, indent=2, ensure_ascii=False)
     print(f"\nWritten to {OUTPUT_FILE}")
+
+    # Save metadata-only version (no grids) for fast startup
+    meta_levels = []
+    for lv in all_levels:
+        ml = {k: v for k, v in lv.items() if k != "grid"}
+        meta_levels.append(ml)
+    with open(META_FILE, "w", encoding="utf-8") as f:
+        json.dump({"levels": meta_levels}, f, indent=2, ensure_ascii=False)
+    print(f"Written to {META_FILE} ({len(meta_levels)} levels, no grid)")
 
     # Story wave preview
     print(f"\nStory mode wave (first 20):")

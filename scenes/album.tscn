@@ -36,12 +36,39 @@ theme_override_font_sizes/font_size = 36
 horizontal_alignment = 1
 text = "关卡图鉴"
 
+[node name="PageLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1560.0
+offset_top = 15.0
+offset_right = 1700.0
+offset_bottom = 55.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PrevBtn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1500.0
+offset_top = 15.0
+offset_right = 1560.0
+offset_bottom = 55.0
+text = "<"
+
+[node name="NextBtn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1700.0
+offset_top = 15.0
+offset_right = 1760.0
+offset_bottom = 55.0
+text = ">"
+
 [node name="ScrollContainer" type="ScrollContainer" parent="."]
 layout_mode = 0
 offset_left = 40.0
 offset_top = 80.0
 offset_right = 1880.0
-offset_bottom = 1060.0
+offset_bottom = 1020.0
 
 [node name="Grid" type="GridContainer" parent="ScrollContainer"]
 columns = 6

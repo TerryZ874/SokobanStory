@@ -2,23 +2,53 @@ extends Control
 
 const THUMB_SIZE := 200
 const CELL_GAP := 10
+const PER_PAGE := 50
+
+var _page := 0
+var _max_page := 0
 
 @onready var grid = $ScrollContainer/Grid
+@onready var page_label = $PageLabel
+@onready var prev_btn = $PrevBtn
+@onready var next_btn = $NextBtn
 
 func _ready():
 	$BackBtn.pressed.connect(_on_back)
+	prev_btn.pressed.connect(_on_prev)
+	next_btn.pressed.connect(_on_next)
+
+	_show_page(0)
+
+
+func _show_page(page: int):
+	# Clear existing cells
+	for c in grid.get_children():
+		c.queue_free()
 
 	var count = level_data.get_level_count()
-	for lid in range(1, count + 1):
+	_max_page = max(0, ceil(count / float(PER_PAGE)) - 1)
+	_page = clamp(page, 0, _max_page)
+
+	var start = _page * PER_PAGE
+	var end = mini(start + PER_PAGE, count)
+
+	for lid in range(start + 1, end + 1):
 		var level = level_data.get_level(lid)
 		if level.is_empty():
 			continue
 		_add_cell(level)
 
+	page_label.text = "%d / %d" % [_page + 1, _max_page + 1]
+	prev_btn.disabled = _page <= 0
+	next_btn.disabled = _page >= _max_page
+
 
 func _add_cell(level: Dictionary):
 	var lid = level.id
 	var completed = save_manager.get_level_steps(lid) > 0
+	# For completed levels, load full data (with grid) for thumbnail rendering
+	if completed:
+		level = level_data.get_full_level(lid)
 	var cell = VBoxContainer.new()
 	cell.custom_minimum_size = Vector2(280, 340)
 	cell.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
@@ -118,12 +148,10 @@ func _render_thumbnail(container: ColorRect, level: Dictionary):
 	var offset_x = (THUMB_SIZE - cols * tile) / 2
 	var offset_y = (THUMB_SIZE - rows * tile) / 2
 
-	# Collect target positions
 	var target_set = {}
 	for t in level.targets:
 		target_set[Vector2i(t[0], t[1])] = true
 
-	# Draw grid
 	for row in rows:
 		for col in cols:
 			var cell_type = level.grid[row][col]
@@ -146,7 +174,6 @@ func _render_thumbnail(container: ColorRect, level: Dictionary):
 
 			container.add_child(rect)
 
-	# Draw target markers on top of boxes or empty floor
 	for t in level.targets:
 		var tx = offset_x + t[0] * tile
 		var ty = offset_y + t[1] * tile
@@ -157,6 +184,14 @@ func _render_thumbnail(container: ColorRect, level: Dictionary):
 		dot.color = Color("#ff4444")
 		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		container.add_child(dot)
+
+
+func _on_prev():
+	_show_page(_page - 1)
+
+
+func _on_next():
+	_show_page(_page + 1)
 
 
 func _on_back():

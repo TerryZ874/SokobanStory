@@ -157,7 +157,7 @@ func _pixel_to_grid(pixel: Vector2) -> Vector2:
 	)
 
 func start_level(level_id: int):
-	level = level_data.get_level(level_id)
+	level = level_data.get_full_level(level_id)
 	if level.is_empty():
 		return
 

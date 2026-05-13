@@ -29,12 +29,7 @@ func _ready():
 		$ContinueBtn.hide()
 
 	# Album button visibility (show after at least 1 level completed)
-	var any_completed = false
-	for lid in range(1, level_data.get_level_count() + 1):
-		if save_manager.get_level_steps(lid) > 0:
-			any_completed = true
-			break
-	$AlbumBtn.visible = any_completed
+	$AlbumBtn.visible = not save_manager.completed_levels.is_empty()
 
 	$ContinueBtn.pressed.connect(_on_continue)
 	$StartBtn.pressed.connect(_on_start)
