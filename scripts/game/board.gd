@@ -6,7 +6,7 @@ const GAME_W := 1920
 const GAME_H := 1080
 const H_MARGIN := 120
 const V_MARGIN := 160
-const MAX_TILE := 80
+const MAX_TILE := 240
 const PLAYER_TEX := preload("res://art_assets/player_idle.PNG")
 const ATLAS_TEX := preload("res://art_assets/enviroment/bg_package.PNG")
 
