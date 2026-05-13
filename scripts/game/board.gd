@@ -6,6 +6,7 @@ const GAME_W := 1920
 const GAME_H := 1080
 const H_MARGIN := 120
 const V_MARGIN := 160
+const MAX_TILE := 80
 const PLAYER_TEX := preload("res://art_assets/player_idle.PNG")
 const ATLAS_TEX := preload("res://art_assets/enviroment/bg_package.PNG")
 
@@ -51,7 +52,7 @@ func _compute_tile_size(rows: int, cols: int) -> int:
 	var avail_h = GAME_H - V_MARGIN
 	var max_tile_w = avail_w / cols if cols > 0 else avail_w
 	var max_tile_h = avail_h / rows if rows > 0 else avail_h
-	return max(16, min(max_tile_w, max_tile_h))
+	return clampi(min(max_tile_w, max_tile_h), 16, MAX_TILE)
 
 func _process(delta):
 	if game_over:
