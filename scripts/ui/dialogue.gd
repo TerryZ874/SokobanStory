@@ -20,22 +20,7 @@ var _scramble_accum: float = 0.0
 
 const BLIP = preload("res://audio/sfx_message.mp3")
 var _blip_player: AudioStreamPlayer
-
-const SPEAKER_COLORS := {
-	"c01": Color("#4a9eff"),
-	"c02": Color("#4ecdc4"),
-	"c03": Color("#ff6b6b"),
-	"c04": Color("#ffa94d"),
-	"c05": Color("#ffd43b"),
-}
-
-const BUBBLE_COLORS := {
-	"c01": Color(0.29, 0.62, 1.0, 0.3),
-	"c02": Color(0.31, 0.80, 0.77, 0.15),
-	"c04": Color(1.0, 0.66, 0.30, 0.15),
-	"c05": Color(1.0, 0.83, 0.23, 0.15),
-}
-
+const GREEN := Color("#60d030")
 const PLAYER_ID := "c01"
 
 func _ready():
@@ -52,7 +37,9 @@ func _ready():
 	continue_btn.pressed.connect(_on_continue)
 	continue_btn.hide()
 	continue_btn.add_theme_font_size_override("font_size", 32)
-	continue_btn.add_theme_color_override("font_color", Color("#33ff33"))
+	continue_btn.add_theme_color_override("font_color", GREEN)
+	skip_btn.add_theme_color_override("font_color", GREEN)
+	skip_btn.add_theme_font_size_override("font_size", 28)
 
 	_start_show_messages()
 
@@ -143,7 +130,6 @@ func _add_message(line: Dictionary):
 	var is_player = line.speaker == PLAYER_ID
 	var char_data = story_data.get_character(line.speaker)
 	var char_name = char_data.get("name", line.speaker) if not char_data.is_empty() else line.speaker
-	var color = SPEAKER_COLORS.get(line.speaker, Color("#808080"))
 
 	var row = HBoxContainer.new()
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -154,56 +140,33 @@ func _add_message(line: Dictionary):
 	var content = VBoxContainer.new()
 	content.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
-	# Header: avatar + name
-	var header = HBoxContainer.new()
-
-	var avatar = Label.new()
-	avatar.text = char_name.left(1)
-	avatar.add_theme_color_override("font_color", Color.WHITE)
-	avatar.add_theme_font_size_override("font_size", 28)
-	avatar.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	avatar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	avatar.custom_minimum_size = Vector2(64, 64)
-
-	var avatar_bg = StyleBoxFlat.new()
-	avatar_bg.bg_color = color
-	avatar_bg.corner_radius_top_left = 16
-	avatar_bg.corner_radius_top_right = 16
-	avatar_bg.corner_radius_bottom_left = 16
-	avatar_bg.corner_radius_bottom_right = 16
-	avatar.add_theme_stylebox_override("normal", avatar_bg)
-
-	var name_label = Label.new()
-	name_label.text = char_name
-	name_label.add_theme_color_override("font_color", color)
-	name_label.add_theme_font_size_override("font_size", 28)
-
-	if is_player:
+	# Header: name only (no avatar). Player name is hidden.
+	if not is_player:
+		var header = HBoxContainer.new()
+		var name_label = Label.new()
+		name_label.text = char_name
+		name_label.add_theme_color_override("font_color", GREEN)
+		name_label.add_theme_font_size_override("font_size", 28)
 		header.add_child(name_label)
-		header.add_child(avatar)
-		header.alignment = BoxContainer.ALIGNMENT_END
-	else:
-		header.add_child(avatar)
-		header.add_child(name_label)
+		content.add_child(header)
 
-	content.add_child(header)
-
-	# Text bubble
+	# Text bubble: black bg, green border, right-angle corners
 	var bubble = Label.new()
 	_current_fultext = line.text
 	_full_text = line.text
-	bubble.text = _full_text  # Set full text first for proper layout size
+	bubble.text = _full_text
 	bubble.add_theme_color_override("font_color", Color.WHITE)
 	bubble.add_theme_font_size_override("font_size", 36)
 	bubble.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	bubble.custom_minimum_size = Vector2(700, 0)
 
 	var bubble_bg = StyleBoxFlat.new()
-	bubble_bg.bg_color = BUBBLE_COLORS.get(line.speaker, Color(0.2, 0.2, 0.2, 0.3))
-	bubble_bg.corner_radius_top_left = 12
-	bubble_bg.corner_radius_top_right = 12
-	bubble_bg.corner_radius_bottom_left = 12
-	bubble_bg.corner_radius_bottom_right = 12
+	bubble_bg.bg_color = Color("#000000")
+	bubble_bg.border_color = GREEN
+	bubble_bg.border_width_top = 2
+	bubble_bg.border_width_bottom = 2
+	bubble_bg.border_width_left = 2
+	bubble_bg.border_width_right = 2
 	bubble_bg.set_content_margin_all(12)
 	bubble.add_theme_stylebox_override("normal", bubble_bg)
 

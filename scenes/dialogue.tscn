@@ -15,7 +15,23 @@ script = ExtResource("1")
 layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
-color = Color(0.08, 0.08, 0.1, 1)
+color = Color("#000000")
+
+[node name="BorderOuter" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 390.0
+offset_top = 190.0
+offset_right = 1530.0
+offset_bottom = 990.0
+color = Color("#60d030")
+
+[node name="BorderInner" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 394.0
+offset_top = 194.0
+offset_right = 1526.0
+offset_bottom = 986.0
+color = Color("#000000")
 
 [node name="Scroll" type="ScrollContainer" parent="."]
 layout_mode = 0
