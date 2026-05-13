@@ -6,6 +6,8 @@ const GAME_W := 1920
 const GAME_H := 1080
 const H_MARGIN := 120
 const V_MARGIN := 160
+const PLAYER_TEX := preload("res://art_assets/player_idle.PNG")
+const ATLAS_TEX := preload("res://art_assets/enviroment/bg_package.PNG")
 
 var level: Dictionary
 var grid_state: Array
@@ -230,22 +232,27 @@ func _render_board():
 	var fg = ColorRect.new()
 	fg.size = Vector2(level.cols * tile_size, level.rows * tile_size)
 	fg.position = board_offset
-	fg.color = Color("#2d2d2d")
+	fg.color = Color("#000000")
 	floor_container.add_child(fg)
 
 	for row in level.rows:
 		for col in level.cols:
 			if grid_state[row][col] == CELL.WALL:
-				var w = ColorRect.new()
-				w.size = Vector2(tile_size, tile_size)
-				w.position = board_offset + Vector2(col * tile_size, row * tile_size)
-				w.color = Color("#999999")
+				var w = Sprite2D.new()
+				w.texture = ATLAS_TEX
+				w.region_enabled = true
+				w.region_rect = Rect2(0, 0, 64, 64)
+				w.scale = Vector2(tile_size / 64.0, tile_size / 64.0)
+				w.position = board_offset + Vector2(col * tile_size + tile_size / 2, row * tile_size + tile_size / 2)
 				wall_container.add_child(w)
 
 	for t in targets:
-		var m = preload("res://scripts/game/target_marker.gd").new()
-		m.tile_size = tile_size
-		m.position = board_offset + Vector2(t.x * tile_size, t.y * tile_size)
+		var m = Sprite2D.new()
+		m.texture = ATLAS_TEX
+		m.region_enabled = true
+		m.region_rect = Rect2(192, 0, 64, 64)
+		m.scale = Vector2(tile_size / 64.0, tile_size / 64.0)
+		m.position = board_offset + Vector2(t.x * tile_size + tile_size / 2, t.y * tile_size + tile_size / 2)
 		target_container.add_child(m)
 
 func _create_player_and_boxes():
@@ -266,12 +273,10 @@ func _make_player(col: int, row: int):
 	var pivot = Node2D.new()
 	pivot.name = "Pivot"
 
-	var s = tile_size - 8
-
-	# Circle body (cyan, 50% of tile)
-	var body = preload("res://scripts/game/player_circle.gd").new()
-	body.tile_size = tile_size
-	body.color = Color("#4ecdc4")
+	# Player sprite
+	var body = Sprite2D.new()
+	body.texture = PLAYER_TEX
+	body.scale = Vector2(tile_size / 64.0, tile_size / 64.0)
 	_player_body = body
 	pivot.add_child(body)
 
@@ -284,10 +289,11 @@ func _make_box(col: int, row: int):
 	var b = Area2D.new()
 	b.position = _grid_to_pixel(col, row)
 
-	var vis = ColorRect.new()
-	vis.size = Vector2(tile_size - 8, tile_size - 8)
-	vis.position = Vector2(-(tile_size - 8) / 2, -(tile_size - 8) / 2)
-	vis.color = Color("#d4a574")
+	var vis = Sprite2D.new()
+	vis.texture = ATLAS_TEX
+	vis.region_enabled = true
+	vis.region_rect = Rect2(64, 0, 64, 64)
+	vis.scale = Vector2(tile_size / 64.0, tile_size / 64.0)
 	b.add_child(vis)
 
 	var col_shape = CollisionShape2D.new()
@@ -339,7 +345,7 @@ func move_player(direction: Vector2):
 		box_positions[box_idx] = bnew
 		player_pos = target
 		current_steps += 1
-		player_pivot.rotation = direction.angle()
+
 
 		var tween = create_tween().set_parallel(true)
 		tween.tween_property(boxes[box_idx], "position", _grid_to_pixel(bx, by), 0.1)
@@ -357,7 +363,7 @@ func move_player(direction: Vector2):
 		_save_snapshot()
 		player_pos = target
 		current_steps += 1
-		player_pivot.rotation = direction.angle()
+
 
 		var tween = create_tween()
 		tween.tween_property(player_node, "position", _grid_to_pixel(tx, ty), 0.1)
@@ -408,7 +414,7 @@ func _update_player_color():
 	if not _player_body or level.is_empty():
 		return
 	var ratio = float(max(0, level.step_limit - current_steps)) / level.step_limit
-	_player_body.color = Color("#4ecdc4").lerp(Color("#888888"), 1.0 - ratio)
+	_player_body.self_modulate = Color.WHITE.lerp(Color("#888888"), 1.0 - ratio)
 
 func _update_push_preview():
 	if game_over:
@@ -437,40 +443,21 @@ func _update_push_preview():
 		if _get_box_at(box_cell) < 0 or _get_box_at(dest_cell) >= 0 or grid_state[dy][dx] != CELL.FLOOR:
 			continue
 
-		# Track this box as pushable
+		# Track this box as pushable (for pulsing animation)
 		var bi = _get_box_at(box_cell)
 		if bi >= 0:
 			_pushable_boxes.append(bi)
-			# Add direction arrow on the box
-			var b = boxes[bi]
-			var arrow = b.get_node_or_null("DirectionArrow")
-			if not arrow:
-				arrow = Polygon2D.new()
-				arrow.name = "DirectionArrow"
-				var as_ = tile_size * 0.24
-				arrow.polygon = PackedVector2Array([
-					Vector2(as_, 0),
-					Vector2(-as_, -as_ * 0.6),
-					Vector2(-as_, as_ * 0.6)
-				])
-				arrow.color = Color("#666666")
-				b.add_child(arrow)
-			arrow.rotation = dir.angle()
-			arrow.show()
 
-		# Get or create preview rect
+		# Get or create push arrow preview
 		if idx >= _push_previews.size():
-			var p = ColorRect.new()
-			p.size = Vector2(tile_size - 8, tile_size - 8)
-			p.color = Color("#d4a574", 0.2)
-			p.pivot_offset = p.size / 2
+			var p = Polygon2D.new()
+			p.color = Color("#60d030", 0.35)
 			entity_container.add_child(p)
 			_push_previews.append(p)
 		var p = _push_previews[idx]
 		_current_push_dests[dest_cell] = dir
-		var dest_px = _grid_to_pixel(dx, dy) - p.size / 2
-		p.scale = Vector2.ONE
-		p.position = dest_px
+		p.polygon = _make_push_arrow(dir)
+		p.position = _grid_to_pixel(dx, dy)
 		p.show()
 		idx += 1
 
@@ -483,9 +470,36 @@ func _update_push_preview():
 	for bi in prev_pushable:
 		if not bi in _pushable_boxes and bi < boxes.size():
 			boxes[bi].scale = Vector2.ONE
-			var arr = boxes[bi].get_node_or_null("DirectionArrow")
-			if arr:
-				arr.hide()
+
+func _make_push_arrow(dir: Vector2) -> PackedVector2Array:
+	var h = tile_size * 0.4
+	var w = tile_size * 0.25
+
+	if dir == Vector2.RIGHT:
+		return PackedVector2Array([
+			Vector2(-tile_size / 2, -h),
+			Vector2(-tile_size / 2, h),
+			Vector2(w, 0),
+		])
+	elif dir == Vector2.LEFT:
+		return PackedVector2Array([
+			Vector2(tile_size / 2, -h),
+			Vector2(tile_size / 2, h),
+			Vector2(-w, 0),
+		])
+	elif dir == Vector2.UP:
+		return PackedVector2Array([
+			Vector2(-h, tile_size / 2),
+			Vector2(h, tile_size / 2),
+			Vector2(0, -w),
+		])
+	elif dir == Vector2.DOWN:
+		return PackedVector2Array([
+			Vector2(-h, -tile_size / 2),
+			Vector2(h, -tile_size / 2),
+			Vector2(0, w),
+		])
+	return PackedVector2Array()
 
 func _update_reachability_preview():
 	if game_over or level.is_empty():
