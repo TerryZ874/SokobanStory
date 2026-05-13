@@ -150,7 +150,7 @@ func _add_message(line: Dictionary):
 		header.add_child(name_label)
 		content.add_child(header)
 
-	# Text bubble: black bg, green border, right-angle corners
+	# Text bubble
 	var bubble = Label.new()
 	_current_fultext = line.text
 	_full_text = line.text
@@ -161,13 +161,19 @@ func _add_message(line: Dictionary):
 	bubble.custom_minimum_size = Vector2(700, 0)
 
 	var bubble_bg = StyleBoxFlat.new()
-	bubble_bg.bg_color = Color("#000000")
-	bubble_bg.border_color = GREEN
-	bubble_bg.border_width_top = 2
-	bubble_bg.border_width_bottom = 2
-	bubble_bg.border_width_left = 2
-	bubble_bg.border_width_right = 2
-	bubble_bg.set_content_margin_all(12)
+	if is_player:
+		# Player: dark green background, no border
+		bubble_bg.bg_color = Color("#003300")
+		bubble_bg.set_content_margin_all(12)
+	else:
+		# Others: black background, green border
+		bubble_bg.bg_color = Color("#000000")
+		bubble_bg.border_color = GREEN
+		bubble_bg.border_width_top = 2
+		bubble_bg.border_width_bottom = 2
+		bubble_bg.border_width_left = 2
+		bubble_bg.border_width_right = 2
+		bubble_bg.set_content_margin_all(12)
 	bubble.add_theme_stylebox_override("normal", bubble_bg)
 
 	content.add_child(bubble)
