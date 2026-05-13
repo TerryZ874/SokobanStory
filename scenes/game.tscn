@@ -37,6 +37,7 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 420.0
 offset_bottom = 65.0
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
 theme_override_font_sizes/font_size = 32
 
 [node name="StepLabel" type="Label" parent="CanvasLayer/HUD"]
@@ -45,6 +46,7 @@ offset_left = 20.0
 offset_top = 70.0
 offset_right = 420.0
 offset_bottom = 115.0
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
 theme_override_font_sizes/font_size = 32
 text = "步数: 0 / 0"
 
@@ -54,6 +56,7 @@ offset_left = 20.0
 offset_top = 120.0
 offset_right = 420.0
 offset_bottom = 165.0
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
 theme_override_font_sizes/font_size = 32
 
 [node name="AIDifficultyLabel" type="Label" parent="CanvasLayer/HUD"]
@@ -62,7 +65,7 @@ offset_left = 20.0
 offset_top = 170.0
 offset_right = 420.0
 offset_bottom = 210.0
-theme_override_colors/font_color = Color(0.3, 0.7, 1, 1)
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="PlayerDifficultyLabel" type="Label" parent="CanvasLayer/HUD"]
@@ -71,26 +74,30 @@ offset_left = 20.0
 offset_top = 210.0
 offset_right = 420.0
 offset_bottom = 250.0
-theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="UndoBtn" type="Button" parent="CanvasLayer/HUD"]
 layout_mode = 0
-offset_left = 800.0
-offset_top = 1020.0
-offset_right = 950.0
-offset_bottom = 1065.0
-theme_override_font_sizes/font_size = 28
+offset_left = 1644.0
+offset_top = 671.0
+offset_right = 1865.0
+offset_bottom = 759.0
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
+theme_override_font_sizes/font_size = 56
 text = "退回-Z"
+alignment = 2
 
 [node name="RestartBtn" type="Button" parent="CanvasLayer/HUD"]
 layout_mode = 0
-offset_left = 970.0
-offset_top = 1020.0
-offset_right = 1120.0
-offset_bottom = 1065.0
-theme_override_font_sizes/font_size = 28
-text = "重来"
+offset_left = 1622.0
+offset_top = 829.0
+offset_right = 1867.0
+offset_bottom = 917.0
+theme_override_colors/font_color = Color(0.376, 0.816, 0.188, 1)
+theme_override_font_sizes/font_size = 56
+text = "重来-R"
+alignment = 2
 
 [node name="PausePanel" type="ColorRect" parent="CanvasLayer/HUD"]
 visible = false

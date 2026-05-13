@@ -17,6 +17,14 @@ Desktop.ini
 # Imported translations (auto-generated)
 *.translation
 
+# Python
+__pycache__/
+*.pyc
+
+# Generated scoring data (14MB+, reproducible from source)
+data/pools/scored_levels.json
+data/pools/scoring_log.txt
+
 # Text editor backups
 *~
 *.swp

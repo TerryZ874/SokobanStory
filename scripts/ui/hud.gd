@@ -29,8 +29,8 @@ func _ready():
 	$PausePanel/RestartBtn.pressed.connect(_on_restart)
 	$PausePanel/BackBtn.pressed.connect(_on_back)
 
-func update_level_info(name: String):
-	level_label.text = name
+func update_level_info(level_id: int):
+	level_label.text = "// %04d关" % level_id
 
 func update_password_display():
 	var pwd = game_state.generate_password(game_state.current_level_id)
@@ -90,7 +90,7 @@ func update_difficulty_display(level: Dictionary):
 
 func update_step_count(steps: int, max_steps: int):
 	var remaining = max_steps - steps
-	var color = Color("#ffffff")
+	var color = Color("#60d030")
 	if steps > max_steps or remaining < 2:
 		color = Color("#ff4444")
 	step_label.text = "步数: " + str(steps) + " / " + str(max_steps)

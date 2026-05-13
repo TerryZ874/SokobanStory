@@ -80,6 +80,10 @@ func _unhandled_input(event: InputEvent):
 	if ke == null or not ke.pressed or ke.echo:
 		return
 
+	if ke.keycode == KEY_U and not game_over:
+		_cheat_skip_level()
+		return
+
 	if ke.keycode == KEY_ESCAPE:
 		if not game_over:
 			hud._toggle_pause()
@@ -199,7 +203,7 @@ func start_level(level_id: int):
 		tw.tween_property(player_pivot, "scale", Vector2(0.8, 0.8), 0.2)
 		tw.tween_property(player_pivot, "scale", Vector2(1.0, 1.0), 0.2)
 
-	hud.update_level_info(level.name)
+	hud.update_level_info(level.id)
 	hud.update_step_count(current_steps, level.step_limit)
 	hud.update_password_display()
 	hud.update_difficulty_display(level)
@@ -229,8 +233,33 @@ func _clear_board():
 		c.queue_free()
 
 func _render_board():
+	var fw = level.cols * tile_size
+	var fh = level.rows * tile_size
+
+	# Outermost green edge (4px)
+	var outer = ColorRect.new()
+	outer.size = Vector2(fw + 96, fh + 96)
+	outer.position = board_offset - Vector2(48, 48)
+	outer.color = Color("#60d030")
+	floor_container.add_child(outer)
+
+	# Black frame (40px)
+	var black_frame = ColorRect.new()
+	black_frame.size = Vector2(fw + 88, fh + 88)
+	black_frame.position = board_offset - Vector2(44, 44)
+	black_frame.color = Color("#000000")
+	floor_container.add_child(black_frame)
+
+	# Inner green border (4px)
+	var inner = ColorRect.new()
+	inner.size = Vector2(fw + 8, fh + 8)
+	inner.position = board_offset - Vector2(4, 4)
+	inner.color = Color("#60d030")
+	floor_container.add_child(inner)
+
+	# Black floor
 	var fg = ColorRect.new()
-	fg.size = Vector2(level.cols * tile_size, level.rows * tile_size)
+	fg.size = Vector2(fw, fh)
 	fg.position = board_offset
 	fg.color = Color("#000000")
 	floor_container.add_child(fg)
@@ -670,6 +699,11 @@ func _go_to_next_dialogue():
 	else:
 		if next_id <= level_data.get_level_count():
 			start_level(next_id)
+
+func _cheat_skip_level():
+	game_over = true
+	game_state.level_completed(level.id, current_steps)
+	_go_to_next_dialogue()
 
 func restart_level():
 	start_level(level.id)
