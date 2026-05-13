@@ -70,6 +70,10 @@ func _load_full_levels():
 	if not data.has("levels"):
 		return
 	for lv in data.levels:
+		lv.cols = int(lv.cols)
+		lv.rows = int(lv.rows)
+		if lv.has("id"):
+			lv.id = int(lv.id)
 		_full_levels[lv.id] = lv
 	_full_loaded = true
 	print("Full levels loaded (with grids): ", _full_levels.size())
