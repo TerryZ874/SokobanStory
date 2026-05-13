@@ -1,7 +1,7 @@
 extends Area2D
 
-const BOX_NORMAL := Rect2(64, 0, 64, 64)
-const BOX_ON_TARGET := Rect2(128, 0, 64, 64)
+const BOX_NORMAL := Rect2(69, 0, 64, 64)
+const BOX_ON_TARGET := Rect2(142, 0, 64, 64)
 
 var is_on_target := false:
 	set(val):

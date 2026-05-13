@@ -250,7 +250,7 @@ func _render_board():
 		var m = Sprite2D.new()
 		m.texture = ATLAS_TEX
 		m.region_enabled = true
-		m.region_rect = Rect2(192, 0, 64, 64)
+		m.region_rect = Rect2(216, 0, 64, 64)
 		m.scale = Vector2(tile_size / 64.0, tile_size / 64.0)
 		m.position = board_offset + Vector2(t.x * tile_size + tile_size / 2, t.y * tile_size + tile_size / 2)
 		target_container.add_child(m)
